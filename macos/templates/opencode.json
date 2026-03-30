@@ -67,9 +67,6 @@
       "*.log"
     ]
   },
-  "compaction": {
-    "enabled": true
-  },
   "instructions": [
     "AGENTS.md"
   ]
