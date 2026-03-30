@@ -1,6 +1,6 @@
 ---
 name: pair-programming
-description: Driver/navigator pair programming protocol and role switching
+description: Driver/navigator pair programming protocol and role switching. Use when interacting with the user, working on code, projects, tests, tooling.
 ---
 
 ## Roles

@@ -1,6 +1,6 @@
 ---
 name: software-design
-description: General software design — simplicity, coupling, cohesion, boundaries, error handling, naming, API design
+description: General software design — simplicity, coupling, cohesion, boundaries, error handling, naming, API design. Use when discussing design options, during pair programming sessions, when features are changed or added.
 ---
 
 ## Principles (in priority order)

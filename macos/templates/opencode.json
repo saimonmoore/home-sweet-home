@@ -21,7 +21,6 @@
   "agent": {
     "build": {
       "mode": "primary",
-      "prompt": "You are in Build mode. Default role: navigator — suggest approaches, review context, wait for the human to decide. When a /command assigns you the driver role, take initiative: scaffold, write, iterate. Check in after each logical unit of work.",
       "permission": {
         "edit": "allow",
         "bash": {
@@ -37,7 +36,6 @@
     },
     "plan": {
       "mode": "primary",
-      "prompt": "You are in Plan mode. Read-only analysis. You cannot edit files. Explore code, surface issues, suggest improvements, draft plans. Load relevant skills before deep analysis.",
       "permission": {
         "edit": "deny",
         "bash": {
@@ -59,10 +57,20 @@
   },
   "watcher": {
     "ignore": [
-      "node_modules/**", ".git/**", "dist/**", "build/**",
-      "target/**", "coverage/**", "__pycache__/**", "*.log"
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**",
+      "target/**",
+      "coverage/**",
+      "__pycache__/**",
+      "*.log"
     ]
   },
-  "compaction": { "enabled": true },
-  "instructions": ["AGENTS.md"]
+  "compaction": {
+    "enabled": true
+  },
+  "instructions": [
+    "AGENTS.md"
+  ]
 }

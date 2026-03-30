@@ -1,6 +1,6 @@
 ---
 name: testing
-description: Test strategy, patterns, and TDD protocol
+description: Test strategy, patterns, and TDD protocol. Use when you need to verify functionality, non-functional properties, after code changes, to prove working artifacts to user.
 ---
 
 ## Role

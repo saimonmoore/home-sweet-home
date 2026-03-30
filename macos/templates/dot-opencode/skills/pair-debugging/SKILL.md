@@ -1,6 +1,6 @@
 ---
 name: pair-debugging
-description: Hypothesis-driven debugging — reproduce, hypothesize, narrow, fix, verify
+description: Hypothesis-driven debugging — reproduce, hypothesize, narrow, fix, verify. Use when you need to troubleshoot, fix a bug, identify a problem, explore root-causes.
 ---
 
 ## Protocol (you drive, human navigates)
