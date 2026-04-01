@@ -8,7 +8,7 @@ networks:
   - vzNAT: true
 cpus: 6
 memory: 6GiB
-disk: 100GiB
+disk: 60GiB
 plain: true
 
 user:
