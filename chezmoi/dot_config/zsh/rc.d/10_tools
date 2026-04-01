@@ -1,3 +1,7 @@
+if command -v mise >/dev/null 2>&1; then
+	eval "$(mise activate zsh)"
+fi
+
 if command -v rg >/dev/null 2>&1; then
 	alias f=rg
 fi
@@ -38,10 +42,6 @@ fi
 
 if command -v fzf >/dev/null 2>&1 && [[ -t 0 && -t 1 ]]; then
 	source <(fzf --zsh)
-fi
-
-if command -v mise >/dev/null 2>&1; then
-	eval "$(mise activate zsh)"
 fi
 
 for autosuggestions_script in \
