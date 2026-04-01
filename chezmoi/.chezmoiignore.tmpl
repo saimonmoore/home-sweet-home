@@ -11,6 +11,9 @@
 {{- end }}
 {{- if eq .target "host" }}
 .ssh/config
+.npmrc
+.yarnrc
+.yarnrc.yml
 {{- end }}
 {{- if eq .context "private" }}
 .config/zsh/rc.d/05_homebrew
