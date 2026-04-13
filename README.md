@@ -38,6 +38,7 @@ mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
 ssh-keygen -q -t ed25519 -N '' -C "dev@dev" -f "$HOME/.ssh/id_ed25519"
 chezmoi init --apply david-krentzlin/home-sweet-home
+mise install
 ```
 
 When `chezmoi` prompts as `dev`, answer:
