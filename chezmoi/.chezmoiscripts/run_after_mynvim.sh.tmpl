@@ -1,0 +1,33 @@
+{{- if .needs_neovim }}
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v git >/dev/null 2>&1; then
+	echo "Error: git is required to install Neovim config." >&2
+	exit 1
+fi
+
+NVIM_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
+NVIM_REPO="https://github.com/david-krentzlin/mynvim.git"
+
+if [[ ! -e "$NVIM_DIR" ]]; then
+	exec git clone --depth 1 "$NVIM_REPO" "$NVIM_DIR"
+fi
+
+if [[ -d "$NVIM_DIR/.git" ]]; then
+	origin_url="$(git -C "$NVIM_DIR" remote get-url origin 2>/dev/null || true)"
+	if [[ "$origin_url" != "$NVIM_REPO" && "$origin_url" != "git@github.com:david-krentzlin/mynvim.git" ]]; then
+		echo "Error: $NVIM_DIR already exists but does not track $NVIM_REPO." >&2
+		exit 1
+	fi
+
+	exec git -C "$NVIM_DIR" pull --ff-only --depth 1
+fi
+
+if rmdir "$NVIM_DIR" 2>/dev/null; then
+	exec git clone --depth 1 "$NVIM_REPO" "$NVIM_DIR"
+fi
+
+echo "Error: $NVIM_DIR already exists and is not a git checkout. Move it away and rerun chezmoi apply." >&2
+exit 1
+{{- end }}

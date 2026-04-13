@@ -20,6 +20,7 @@ When `chezmoi` prompts on the host, answer:
 
 - `Will you develop on this machine?` -> `no`
 - `Will you need opencode on this machine?` -> `no`
+- `Will you need Neovim on this machine?` -> `no`
 - fill in `Git author name`, `Git author email`, `GitHub username`, and `Work username`
 
 #### VM as `dev`
@@ -43,6 +44,7 @@ When `chezmoi` prompts as `dev`, answer:
 
 - `Will you develop on this machine?` -> `yes`
 - `Will you need opencode on this machine?` -> `no`
+- `Will you need Neovim on this machine?` -> `yes`
 - fill in the same identity values as on the host
 
 #### VM as `agent`
@@ -66,6 +68,7 @@ When `chezmoi` prompts as `agent`, answer:
 
 - `Will you develop on this machine?` -> `no`
 - `Will you need opencode on this machine?` -> `yes`
+- `Will you need Neovim on this machine?` -> `no`
 - fill in the same identity values as on the host
 
 Open the VM as `dev` or `agent` when you need a shell.
@@ -80,6 +83,8 @@ Use `,dev` and `,agent` instead of raw `limactl shell` commands.
 Repos under `/workspaces` are intended to be shared between `dev` and `agent`.
 
 `chezmoi` can read this repo directly from GitHub because the repo root now contains `.chezmoiroot` pointing at `chezmoi/`.
+
+If `Will you need Neovim on this machine?` is `yes`, `chezmoi` also keeps a shallow clone of `https://github.com/david-krentzlin/mynvim` at `~/.config/nvim`.
 
 Use `david-krentzlin/home-sweet-home` with `chezmoi init`. Username-only shorthand resolves to `david-krentzlin/dotfiles`, which is not this repo.
 
@@ -99,7 +104,7 @@ Use `david-krentzlin/home-sweet-home` with `chezmoi init`. Username-only shortha
 - Create the VM from the host with `,create-vm`
 - Keep shared repos under `/workspaces` on the vm
 - Run `chezmoi update` on the host to pull helper and dotfile changes
-- Run `chezmoi update` as `dev` or `agent` in the VM to pull and apply dotfile changes
+- Run `chezmoi update` as `dev` or `agent` in the VM to pull and apply dotfile changes, including `mynvim` when enabled
 - Apply as `dev` first, then as `agent`, if you update both VM users
 
 ## Access VM Servers From The Host

@@ -1,5 +1,0 @@
--- ┌────────────────────┐
--- │ Ruby configuration │
--- └────────────────────┘
---
--- Filetype-specific configuration for Ruby files

@@ -1,5 +1,0 @@
--- ┌────────────────────┐
--- │ Rust configuration │
--- └────────────────────┘
---
--- Filetype-specific configuration for Rust files

@@ -27,6 +27,6 @@
 .config/opencode
 .config/opencode/**
 {{- end }}
-{{- if and .needs_opencode (not .develop) }}
+{{- if not .needs_neovim }}
 .config/zsh/rc.d/30_nvim
 {{- end }}

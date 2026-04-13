@@ -1,5 +1,0 @@
--- ┌──────────────────┐
--- │ Go configuration │
--- └──────────────────┘
---
--- Filetype-specific configuration for Go files

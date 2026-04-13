@@ -10,7 +10,9 @@ ruby.compile = false
 opencode = "latest"
 {{- end }}
 starship = "latest"
+{{- if .needs_neovim }}
 neovim = "latest"
+{{- end }}
 {{- if not $host }}
 "github:max-sixty/worktrunk" = { version = "latest", bin = "wt" }
 {{- end }}
