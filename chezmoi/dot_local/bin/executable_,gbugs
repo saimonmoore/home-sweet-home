@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+exec sh -c "git log -i -E --grep='fix|bug|broken' --name-only --format='' \"$@\" | sort | uniq -c | sort -nr | sed '/^ *[0-9][0-9]* $/d' | head -20" sh "$@"

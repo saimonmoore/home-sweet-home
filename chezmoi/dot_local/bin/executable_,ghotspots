@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+exec sh -c "git log --format=format: --name-only --since='1 year ago' \"$@\" | sort | uniq -c | sort -nr | sed '/^ *[0-9][0-9]* $/d' | head -20" sh "$@"

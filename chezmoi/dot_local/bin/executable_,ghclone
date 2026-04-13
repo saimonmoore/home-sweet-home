@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+	echo "Usage: ,ghclone owner/repository" >&2
+	exit 1
+fi
+
+repo_ref="$1"
+
+case "$repo_ref" in
+	*/*) ;;
+	*)
+		echo "Error: expected owner/repository." >&2
+		exit 1
+		;;
+esac
+
+owner="${repo_ref%%/*}"
+repo="${repo_ref#*/}"
+target_dir="$HOME/code/github/$owner/$repo"
+
+if [[ -e "$target_dir" ]]; then
+	echo "Error: target already exists: $target_dir" >&2
+	exit 1
+fi
+
+mkdir -p "$(dirname "$target_dir")"
+exec git clone "https://github.com/$owner/$repo.git" "$target_dir"

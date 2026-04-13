@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -gt 0 ]]; then
+	exec git log --format='%ad' --date=format:'%Y-%m' "$@" | sort | uniq -c
+fi
+
+exec sh -c "git log --format='%ad' --date=format:'%Y-%m' | sort | uniq -c"

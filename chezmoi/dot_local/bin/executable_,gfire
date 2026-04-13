@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+	exec git log --oneline --since="1 year ago" | grep -iE 'revert|hotfix|emergency|rollback'
+fi
+
+exec git log --oneline "$@" | grep -iE 'revert|hotfix|emergency|rollback'

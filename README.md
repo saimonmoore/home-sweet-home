@@ -105,6 +105,8 @@ That delivers the auth callback to the OpenCode process running inside the VM.
 - Pull and apply host changes with `,chezmoi-update`
 - Pull and apply VM changes with `,chezmoi-update` as `dev`, including `mynvim` when enabled
 - Run `,setup-scala` in the VM after syncing JFrog credentials when you need Scala/Metals tooling
+- Clone GitHub repos into `~/code/github/<owner>/<repo>` with `,ghclone owner/repository`
+- Use `,ghotspots`, `,gauthors`, `,gbugs`, `,gactivity`, `,gfire`, and `,gbranches` for quick git repo diagnostics
 - For OpenCode browser auth in the VM, finish login on the host and `curl` the final localhost callback URL from inside the VM
 
 ## Access VM Servers From The Host
