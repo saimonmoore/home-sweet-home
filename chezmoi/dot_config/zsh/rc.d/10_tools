@@ -15,10 +15,6 @@ if command -v bat >/dev/null 2>&1; then
 	alias less=bat
 fi
 
-if command -v podman >/dev/null 2>&1; then
-	alias docker=podman
-fi
-
 dir_colors_file="${XDG_CONFIG_HOME:-$HOME/.config}/dir_colors"
 if [[ -f "$dir_colors_file" ]]; then
 	if command -v dircolors >/dev/null 2>&1; then
