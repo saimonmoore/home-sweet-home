@@ -1,5 +1,4 @@
 {{- $host := not .develop -}}
-{{- if ne .work_username "" }}
 if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/home-sweet-home/jfrog-oidc.env" ]]; then
 	source "${XDG_CONFIG_HOME:-$HOME/.config}/home-sweet-home/jfrog-oidc.env"
 fi
@@ -40,5 +39,4 @@ fi
 		echo "Coursier credentials file missing"
 	fi
 }
-{{- end }}
 {{- end }}

@@ -123,7 +123,7 @@ chmod 600 "$hsh_config_dir/jfrog-oidc.env"
 printf "realm=%s\nhost=%s\nuser=%s\npassword=%s\n" "$JFROG_REALM" "$JFROG_HOST" "$JFROG_OIDC_USER" "$JFROG_OIDC_TOKEN" > "$ivy_dir/.credentials"
 chmod 600 "$ivy_dir/.credentials"
 
-printf "jfrog.username=%s\njfrog.password=%s\njfrog.host=%s\njfrog.realm=%s\n" "$JFROG_OIDC_USER" "$JFROG_OIDC_TOKEN" "$JFROG_HOST" "$JFROG_REALM" > "$coursier_dir/credentials.properties"
+printf "jfrog.username=%s\njfrog.password=%s\njfrog.host=%s\n" "$JFROG_OIDC_USER" "$JFROG_OIDC_TOKEN" "$JFROG_HOST" > "$coursier_dir/credentials.properties"
 chmod 600 "$coursier_dir/credentials.properties"
 EOF
 } >"$TMP_REMOTE_SCRIPT"

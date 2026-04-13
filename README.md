@@ -167,7 +167,9 @@ Sync credentials for a VM user with:
 ,sync-jfrog-to-vm --host your.jfrog.example.com
 ```
 
-The default realm is `Artifactory Realm`. If your setup differs, pass `--realm` explicitly.
+The default realm is `Artifactory Realm`. If `sbt` itself needs authenticated bootstrap access and your setup uses a different realm, pass `--realm` explicitly.
+
+If you are not sure which realm JFrog is using, inspect the `WWW-Authenticate` response header from a protected repository URL and copy the realm value.
 
 If Ruby gems use a different host than Scala/sbt, pass `--ruby-host` too.
 
