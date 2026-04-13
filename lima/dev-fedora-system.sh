@@ -5,6 +5,14 @@ dnf install -y git curl sudo ca-certificates chezmoi zsh zsh-autosuggestions ope
 
 usermod -s /bin/zsh dev
 
+if ! grep -q '^dev:' /etc/subuid; then
+	usermod --add-subuids 100000-165535 dev
+fi
+
+if ! grep -q '^dev:' /etc/subgid; then
+	usermod --add-subgids 100000-165535 dev
+fi
+
 install -d -m 755 -o dev -g dev /home/dev/code
 
 if ! command -v mise >/dev/null 2>&1; then
