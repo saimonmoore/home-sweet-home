@@ -1,46 +1,41 @@
-{{- $host := not .develop -}}
-{{- $work := ne .work_username "" -}}
 {{- $needsNeovim := .develop -}}
 {{- if hasKey . "needs_neovim" }}{{- $needsNeovim = .needs_neovim }}{{- end }}
+
 [settings]
 experimental = true
 install_before = "7d"
 ruby.compile = false
 
 [tools]
+
 {{- if .needs_opencode }}
 opencode = "latest"
 {{- end }}
+
 starship = "latest"
 {{- if $needsNeovim }}
 neovim = "latest"
 {{- end }}
-{{- if not $host }}
-"github:max-sixty/worktrunk" = { version = "latest", bin = "wt" }
-{{- end }}
+
 {{- if .develop }}
 bun = "latest"
 go = "latest"
 node = "lts"
 shfmt = "latest"
 yq = "latest"
+"github:max-sixty/worktrunk" = { version = "latest", bin = "wt" }
+helm-ls = "latest"
 "go:golang.org/x/tools/gopls" = "latest"
 "npm:yaml-language-server" = "latest"
 "npm:bash-language-server" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
 "npm:dockerfile-language-server-nodejs" = "latest"
 "npm:@microsoft/compose-language-service" = "latest"
-{{- end }}
-{{- if and (not $host) $work }}
+
 java = "latest"
-{{- end }}
-{{- if and .develop $work }}
-helm-ls = "latest"
 "github:scalameta/scalafmt" = "latest"
-{{- end }}
-{{- if and (not $host) $work }}
 [tools."github:coursier/coursier"]
-version = "latest"
-asset_pattern = "coursier"
-bin = "cs"
+  version = "latest"
+  asset_pattern = "coursier"
+  bin = "cs"
 {{- end }}
