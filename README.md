@@ -104,6 +104,7 @@ That delivers the auth callback to the OpenCode process running inside the VM.
 - Keep shared repos under `/workspaces` on the vm
 - Pull and apply host changes with `,chezmoi-update`
 - Pull and apply VM changes with `,chezmoi-update` as `dev`, including `mynvim` when enabled
+- Run `,setup-scala` in the VM after syncing JFrog credentials when you need Scala/Metals tooling
 - For OpenCode browser auth in the VM, finish login on the host and `curl` the final localhost callback URL from inside the VM
 
 ## Access VM Servers From The Host
@@ -175,3 +176,19 @@ The sync writes VM-local files only:
 - `~/.config/coursier/credentials.properties`
 
 On VM work shells, `SBT_CREDENTIALS` and `COURSIER_CREDENTIALS` are exported automatically when those files exist.
+
+## Setup Scala In The VM
+
+After syncing JFrog credentials into the VM, run:
+
+```bash
+,setup-scala
+```
+
+This installs or updates the Scala toolchain expected by the VM setup:
+
+- trust and install the current `mise` tool config
+- add a `helm-ls` symlink when `helm_ls` is installed via `mise`
+- install `sbt` and `metals` via `cs`
+
+`COURSIER_CREDENTIALS` and `SBT_CREDENTIALS` are picked up from the JFrog files synced into the VM.
