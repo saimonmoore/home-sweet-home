@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eux -o pipefail
 
-dnf install -y git curl sudo ca-certificates chezmoi zsh zsh-autosuggestions openssh-clients podman tmux ripgrep fd-find bat eza zoxide fzf jq tar unzip gzip make gcc gcc-c++ helm
+dnf install -y git curl sudo ca-certificates chezmoi zsh zsh-autosuggestions openssh-clients podman podman-compose tmux ripgrep fd-find bat eza zoxide fzf jq tar unzip gzip make gcc gcc-c++ helm
 
 usermod -s /bin/zsh dev
 
