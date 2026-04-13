@@ -386,6 +386,7 @@ config.keys = {
   { key = "p", mods = "LEADER",       action = act.ActivateCommandPalette },
   { key = "w", mods = "LEADER",       action = wezterm.action_callback(workspace_switcher) },
   { key = "w", mods = "LEADER|SHIFT", action = wezterm.action_callback(prompt_new_workspace) },
+  { key = "d", mods = "LEADER",       action = split_into_vm(",dev") },
   { key = "r", mods = "LEADER",       action = wezterm.action_callback(remote_session_picker) },
   { key = "r", mods = "LEADER|SHIFT", action = act.ReloadConfiguration },
   { key = "R", mods = "LEADER|SHIFT", action = wezterm.action_callback(prompt_rename_workspace) },
@@ -417,6 +418,7 @@ config.keys = {
   { key = "J", mods = "ALT|SHIFT",    action = act.AdjustPaneSize { "Down", 5 } },
   { key = "K", mods = "ALT|SHIFT",    action = act.AdjustPaneSize { "Up", 5 } },
   { key = "L", mods = "ALT|SHIFT",    action = act.AdjustPaneSize { "Right", 5 } },
+  { key = "|", mods = "LEADER",       action = act.SplitPane { direction = "Right", size = { Percent = 50 } } },
   {
     key = "n",
     mods = "LEADER",
