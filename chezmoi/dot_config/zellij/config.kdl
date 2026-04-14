@@ -9,7 +9,7 @@ default_layout "default"
 copy_on_select true
 scrollback_editor "hx"
 mouse_mode true
-session_serialization true
+session_serialization false
 show_startup_tips false
 web_server false
 web_sharing "off"
