@@ -56,5 +56,5 @@ fi
 limactl start --name="$INSTANCE_NAME" "$TEMPLATE_PATH"
 
 echo "Fedora VM '$INSTANCE_NAME' created."
-echo "Dev shell:   limactl shell --workdir /home/dev $INSTANCE_NAME"
+echo "Dev shell:   limactl shell --tty --reconnect --workdir /home/dev --shell /usr/bin/zsh $INSTANCE_NAME"
 echo "Then run chezmoi init --apply david-krentzlin/home-sweet-home as dev."

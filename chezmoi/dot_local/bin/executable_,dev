@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -eq 0 ]]; then
-	exec limactl shell --workdir /home/dev dev zsh -lic 'if command -v zellij >/dev/null 2>&1; then exec zellij attach -c dev; fi; exec zsh -l'
+	exec limactl shell --tty --reconnect --workdir /home/dev --shell /usr/bin/zsh dev -lic 'if command -v zellij >/dev/null 2>&1; then exec zellij attach -c dev; fi; exec /usr/bin/zsh -l'
 fi
 
-exec limactl shell --workdir /home/dev dev "$@"
+exec limactl shell --tty --reconnect --workdir /home/dev --shell /usr/bin/zsh dev "$@"

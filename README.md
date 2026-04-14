@@ -26,7 +26,7 @@ When `chezmoi` prompts on the host, answer:
 #### VM as `dev`
 
 ```bash
-limactl shell --workdir /home/dev dev
+limactl shell --tty --reconnect --workdir /home/dev --shell /usr/bin/zsh dev
 # or
 ,dev
 ```
@@ -60,6 +60,8 @@ Open the VM as `dev` when you need a shell.
 ```
 
 Use `,dev` instead of raw `limactl shell` commands.
+
+Existing VMs created before the login-shell fix may still have `/bin/bash` as `dev`'s login shell. Recreate the VM or run `sudo usermod -s /usr/bin/zsh dev` inside it once.
 
 Keep repos under `~/code` in the VM.
 
