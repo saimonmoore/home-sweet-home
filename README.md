@@ -26,7 +26,7 @@ When `chezmoi` prompts on the host, answer:
 #### VM as `dev`
 
 ```bash
-limactl shell --workdir /home/dev dev sudo -iu dev
+limactl shell --workdir /home/dev dev
 # or
 ,dev
 ```

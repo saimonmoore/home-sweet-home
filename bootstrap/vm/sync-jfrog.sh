@@ -128,7 +128,7 @@ chmod 600 "$coursier_dir/credentials.properties"
 EOF
 } >"$TMP_REMOTE_SCRIPT"
 
-cat "$TMP_REMOTE_SCRIPT" | limactl shell --workdir /home/dev "$INSTANCE_NAME" sudo -iu dev bash -s
+cat "$TMP_REMOTE_SCRIPT" | limactl shell --workdir /home/dev "$INSTANCE_NAME" bash -s
 
 echo "Synced JFrog credentials for dev on VM $INSTANCE_NAME"
 echo "Bundler host: $RUBY_HOST"

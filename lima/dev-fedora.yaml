@@ -15,7 +15,7 @@ user:
   name: dev
   comment: Development User
   home: /home/dev
-  shell: /bin/bash
+  shell: /bin/zsh
 
 mounts: []
 
@@ -39,4 +39,4 @@ probes:
 
 message: |
   Fedora work VM ready.
-  Dev shell:   limactl shell --workdir /home/dev {{.Name}} sudo -iu dev
+  Dev shell:   limactl shell --workdir /home/dev {{.Name}}
