@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -eq 0 ]]; then
-	exec limactl shell --workdir /home/dev dev sudo -iu dev
+	exec limactl shell --workdir /home/dev dev sudo -iu dev -- sh -lc 'if command -v zellij >/dev/null 2>&1; then exec zellij attach -c dev; fi; exec "$SHELL" -l'
 fi
 
 exec limactl shell --workdir /home/dev dev sudo -iu dev -- "$@"
