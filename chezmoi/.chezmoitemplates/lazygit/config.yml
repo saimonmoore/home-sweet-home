@@ -39,6 +39,8 @@ git:
 os:
   editPreset: "helix"
 
+promptToReturnFromSubprocess: false
+
 keybinding:
   universal:
     quit: "q"
