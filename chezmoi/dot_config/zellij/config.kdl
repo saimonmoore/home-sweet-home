@@ -21,6 +21,7 @@ keybinds {
                 floating true
                 move_to_focused_tab true
             }
+            SwitchToMode "Locked"
         }
         bind "Alt n" { NewPane; SwitchToMode "Locked"; }
         bind "Alt -" { NewPane "Down"; SwitchToMode "Locked"; }
