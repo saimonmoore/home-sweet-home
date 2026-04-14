@@ -16,6 +16,12 @@ keybinds {
     unbind "Ctrl g"
 
     normal {
+        bind "Ctrl o" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
         bind "Alt n" { NewPane; SwitchToMode "Locked"; }
         bind "Alt -" { NewPane "Down"; SwitchToMode "Locked"; }
         bind "Alt \\" { NewPane "Right"; SwitchToMode "Locked"; }
