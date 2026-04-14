@@ -38,6 +38,8 @@ keybinds {
         bind "Alt 5" { GoToTab 5; SwitchToMode "Locked"; }
         bind "Alt [" { GoToPreviousTab; SwitchToMode "Locked"; }
         bind "Alt ]" { GoToNextTab; SwitchToMode "Locked"; }
+        bind "Alt o" { SwitchToMode "Session"; }
+        bind "Alt p" { SwitchToMode "Pane"; }
         bind "Alt r" { SwitchToMode "RenameTab"; TabNameInput 0; }
         bind "Alt e" { SwitchToMode "Resize"; }
         bind "Alt s" { SwitchToMode "Scroll"; }
