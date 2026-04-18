@@ -3,7 +3,7 @@
 #
 # Installs Homebrew (if missing), installs chezmoi (needed to apply the
 # dotfiles — it is also listed in the Brewfile for later installs), then
-# runs `chezmoi init --apply saimon-moore/home-sweet-home`. After chezmoi
+# runs `chezmoi init --apply saimonmoore/home-sweet-home`. After chezmoi
 # finishes, the post-apply hook on work hosts runs `brew bundle` against
 # bootstrap/host/Brewfile.work to install the rest of the host tooling.
 #
@@ -44,8 +44,8 @@ else
 fi
 
 # --- Apply dotfiles ---------------------------------------------------------
-log "Running: chezmoi init --apply saimon-moore/home-sweet-home"
-chezmoi init --apply saimon-moore/home-sweet-home
+log "Running: chezmoi init --apply saimonmoore/home-sweet-home"
+chezmoi init --apply saimonmoore/home-sweet-home
 
 # --- Next steps -------------------------------------------------------------
 cat <<'NEXT'
@@ -67,7 +67,7 @@ load, then:
        chmod 700 "$HOME/.ssh"
        ssh-keygen -q -t ed25519 -N '' \
          -C "dev@dev" -f "$HOME/.ssh/id_ed25519"
-       chezmoi init --apply saimon-moore/home-sweet-home
+       chezmoi init --apply saimonmoore/home-sweet-home
        mise install
        chezmoi apply
 
@@ -75,6 +75,6 @@ load, then:
        ,cheatsheet
 
 Full docs (VM networking, JFrog credentials, OpenCode auth):
-  https://github.com/saimon-moore/home-sweet-home#readme
+  https://github.com/saimonmoore/home-sweet-home#readme
 ============================================================
 NEXT

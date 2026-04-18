@@ -1,6 +1,6 @@
 # Adapting home-sweet-home
 
-This guide documents the original author's (saimon-moore) choices across
+This guide documents the original author's (saimonmoore) choices across
 this dotfiles repo and points out exactly what to change to tailor it to your
 own preferences. Work through sections top-down; each builds on the last.
 

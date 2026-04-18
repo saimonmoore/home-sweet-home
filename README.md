@@ -9,7 +9,7 @@ On a fresh Mac, one command bootstraps Homebrew, chezmoi, and this
 repo's dotfiles:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/saimon-moore/home-sweet-home/main/bootstrap/host/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/saimonmoore/home-sweet-home/main/bootstrap/host/install.sh)
 ```
 
 The installer is idempotent, so it is safe to re-run.
@@ -36,7 +36,7 @@ If you prefer to do it by hand rather than use the one-liner above:
 ```bash
 # Install Homebrew (https://brew.sh), then:
 brew install chezmoi
-chezmoi init --apply saimon-moore/home-sweet-home
+chezmoi init --apply saimonmoore/home-sweet-home
 ,create-vm
 ```
 
@@ -56,7 +56,7 @@ Run inside the VM as `dev`:
 mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
 ssh-keygen -q -t ed25519 -N '' -C "dev@dev" -f "$HOME/.ssh/id_ed25519"
-chezmoi init --apply saimon-moore/home-sweet-home
+chezmoi init --apply saimonmoore/home-sweet-home
 mise install
 chezmoi apply
 ```
@@ -88,7 +88,7 @@ Every machine also gets:
 - `,chezmoi-init` to run `chezmoi apply`
 - `,chezmoi-update` to run `chezmoi update`
 
-Use `saimon-moore/home-sweet-home` with `chezmoi init`. Username-only shorthand resolves to `saimon-moore/dotfiles`, which is not this repo.
+Use `saimonmoore/home-sweet-home` with `chezmoi init`. Username-only shorthand resolves to `saimonmoore/dotfiles`, which is not this repo.
 
 ## OpenCode Browser Auth In The VM
 
