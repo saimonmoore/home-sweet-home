@@ -1,7 +1,7 @@
 minimumLimaVersion: 2.0.0
 
 base:
-  - template:fedora
+  - template:ubuntu-lts
 
 vmType: vz
 networks:
@@ -25,7 +25,7 @@ containerd:
 
 provision:
   - mode: system
-    file: dev-fedora-system.sh
+    file: dev-ubuntu-system.sh
 
 probes:
   - mode: readiness
@@ -38,5 +38,5 @@ probes:
       command -v mise
 
 message: |
-  Fedora work VM ready.
+  Ubuntu work VM ready.
   Dev shell:   limactl shell --tty --reconnect --workdir /home/dev --shell /usr/bin/zsh {{.Name}}

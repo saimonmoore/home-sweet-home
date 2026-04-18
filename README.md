@@ -1,6 +1,6 @@
 # home-sweet-home
 
-Dotfiles for my host plus an isolated Fedora VM for development.
+Dotfiles for my host plus an isolated Ubuntu VM for development.
 
 
 ## First-Time Setup

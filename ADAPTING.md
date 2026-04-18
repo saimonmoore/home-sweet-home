@@ -11,7 +11,7 @@ Two managers drive everything:
 - **chezmoi** — renders dotfiles from `chezmoi/` into `$HOME` on every machine.
   `.chezmoiroot` (at repo root) points chezmoi at the `chezmoi/` subdirectory
   so `chezmoi init --apply <user>/home-sweet-home` works directly.
-- **lima** — boots a Fedora VM on the macOS host using `lima/dev-fedora.yaml`.
+- **lima** — boots an Ubuntu LTS VM on the macOS host using `lima/dev-ubuntu.yaml`.
   The VM is where *all* development happens; the host stays minimal.
 
 The repo is split into three top-level folders:
@@ -20,7 +20,7 @@ The repo is split into three top-level folders:
 |---------------|--------------------------------------------------------------|
 | `chezmoi/`    | Templated dotfiles (zsh, Zellij, Yazi, Lazygit, etc.) |
 | `bootstrap/`  | One-shot scripts: `host/` (Brewfile) and `vm/` (VM create, JFrog sync, Scala setup) |
-| `lima/`       | Lima VM definition (`dev-fedora.yaml`) and provisioning (`dev-fedora-system.sh`) |
+| `lima/`       | Lima VM definition (`dev-ubuntu.yaml`) and provisioning (`dev-ubuntu-system.sh`) |
 
 `.chezmoiscripts/` under `chezmoi/` holds `run_once` / `run_after` hooks that
 fire from chezmoi based on template conditions.
@@ -66,28 +66,35 @@ relevant entries in `.chezmoiignore.tmpl` and re-apply.
 
 ## The Lima VM
 
-Defined in `lima/dev-fedora.yaml`:
+Defined in `lima/dev-ubuntu.yaml`:
 
-- **Distro:** Fedora (vzNAT, vz VMType — native on Apple Silicon)
+- **Distro:** Ubuntu LTS via `template:ubuntu-lts` (vzNAT, vz VMType — native on Apple Silicon)
 - **Resources:** 6 CPUs, 6 GiB RAM, 60 GiB disk
 - **User:** `dev` with login shell `/usr/bin/zsh`
 - **Mounts:** none (intentional — keeps host/VM cleanly separated)
 - **Containerd:** disabled (podman installed instead)
 - **Networking:** vzNAT; localhost-bound ports auto-forward to host; 0.0.0.0 services reached via `,vm-ip`
 
-`lima/dev-fedora-system.sh` provisions system packages via `dnf`: git, curl,
-chezmoi, zsh, zsh-autosuggestions, ripgrep, fd, bat, eza, zoxide, fzf, jq,
-make, gcc, helm, podman, podman-compose, and bootstraps `mise`.
+`lima/dev-ubuntu-system.sh` provisions via `apt-get`: git, curl, zsh,
+zsh-autosuggestions, openssh-client, podman, podman-compose, uidmap,
+ripgrep, fd-find, bat, eza, zoxide, fzf, jq, tar, unzip, gzip, and
+build-essential. `chezmoi`, `helm`, and `mise` are not in the default Ubuntu
+repositories, so they're installed from their upstream install scripts.
+
+Because Ubuntu ships `fd-find` as `fdfind` and `bat` as `batcat`, the
+provisioning script symlinks `/usr/local/bin/fd` → `/usr/bin/fdfind` and
+`/usr/local/bin/bat` → `/usr/bin/batcat` so the zsh aliases
+(`cat=bat`, `ff='fd --glob'`) work unchanged.
 
 **Common adaptations:**
 
 | Change                  | File / line                                                    |
 |-------------------------|----------------------------------------------------------------|
-| Swap distro             | `lima/dev-fedora.yaml` (base template) + rewrite provisioning dnf commands in `lima/dev-fedora-system.sh` |
-| Change resources        | `cpus`, `memory`, `disk` in `dev-fedora.yaml`                  |
-| Add host mounts         | `mounts:` list in `dev-fedora.yaml` (empty by default)         |
+| Swap distro             | `lima/dev-ubuntu.yaml` (base template) + rewrite provisioning apt commands in `lima/dev-ubuntu-system.sh` |
+| Change resources        | `cpus`, `memory`, `disk` in `dev-ubuntu.yaml`                  |
+| Add host mounts         | `mounts:` list in `dev-ubuntu.yaml` (empty by default)         |
 | Different VM name       | Pass `--name` to `,create-vm`; update `,dev`, `,vm-ip`, `,vm-open`, `,sync-jfrog-to-vm` scripts if you want a different default |
-| Different default shell | `user.shell` in `dev-fedora.yaml` and the `chsh` step          |
+| Different default shell | `user.shell` in `dev-ubuntu.yaml` and the `chsh` step          |
 
 Existing VMs predating the vzNAT change need a one-off network reset — see
 the README.
@@ -119,7 +126,7 @@ system binaries. Inventory:
 | Command               | Purpose                                                  |
 |-----------------------|----------------------------------------------------------|
 | `,dev`                | attach/create the zellij session inside the VM           |
-| `,create-vm`          | bootstrap the Fedora VM via limactl                      |
+| `,create-vm`          | bootstrap the Ubuntu VM via limactl                      |
 | `,vm-ip`              | print the VM's lima0 IPv4 address                        |
 | `,vm-open [PORT]`     | open `http://<vm-ip>[:PORT]` in the host browser         |
 | `,chezmoi-init`       | `chezmoi apply`                                          |
@@ -309,7 +316,7 @@ Add a personal Brewfile by creating `Brewfile.personal` and updating the
 - `Brewfile.work` — brew bundle manifest
 
 `bootstrap/vm/`:
-- `macos-create-fedora.sh` — `limactl start` driven by `lima/dev-fedora.yaml`
+- `macos-create-ubuntu.sh` — `limactl start` driven by `lima/dev-ubuntu.yaml`
 - `setup-scala.sh` — mise trust/install + `cs install sbt metals`
 - `sync-jfrog.sh` — JFrog creds into the VM
 
@@ -323,7 +330,7 @@ chezmoi run hooks (in `chezmoi/.chezmoiscripts/`):
 | Choice                         | Keep, swap, or remove?                          |
 |--------------------------------|-------------------------------------------------|
 | chezmoi as dotfile manager     | Keep unless you really prefer stow/yadm         |
-| Fedora on Lima                 | Swap distro in `lima/dev-fedora.yaml` if you want Ubuntu/Arch/NixOS |
+| Ubuntu LTS on Lima             | Swap distro in `lima/dev-ubuntu.yaml` if you want Fedora/Arch/NixOS |
 | `,`-prefix for custom commands | Rename all at once if you dislike it            |
 | Neovim + LazyVim as editor     | Swap for Helix/Emacs/etc; replace `nvim` in zsh/git/yazi/scooter/zellij/lazygit + LazyVim bootstrap script |
 | Catppuccin Mocha everywhere    | Replace in five config files (Zellij, Yazi, Scooter, starship, taskrc); nvim theme is set by LazyVim |
@@ -333,7 +340,7 @@ chezmoi run hooks (in `chezmoi/.chezmoiscripts/`):
 | Taskwarrior                    | Fully opt-in                                    |
 | JFrog + Scala work flow        | Work-specific; drop if not needed               |
 | VM `~/code` repo layout        | Change in `,ghclone` if you want a flat layout  |
-| No VM mounts                   | Add `mounts:` in `dev-fedora.yaml` if you want shared code with the host |
+| No VM mounts                   | Add `mounts:` in `dev-ubuntu.yaml` if you want shared code with the host |
 | zsh only                       | Swap means rewriting every file in `dot_config/zsh/rc.d/` |
 
 ## Recommended adaptation order
@@ -343,7 +350,7 @@ chezmoi run hooks (in `chezmoi/.chezmoiscripts/`):
 2. Walk through `chezmoi/.chezmoi.toml.tmpl` — keep/remove prompts first so
    everything downstream has stable variables.
 3. Update `chezmoi/.chezmoiignore.tmpl` to match any new host/VM split.
-4. Edit `lima/dev-fedora.yaml` for your resources/distro.
+4. Edit `lima/dev-ubuntu.yaml` for your resources/distro.
 5. Trim/extend `bootstrap/host/Brewfile.work` and the mise config.
 6. Rename `,`-prefixed commands (or don't).
 7. Replace the color scheme (or don't).

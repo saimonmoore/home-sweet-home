@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
-	echo "Error: bootstrap/vm/macos-create-fedora.sh must be run on macOS." >&2
+	echo "Error: bootstrap/vm/macos-create-ubuntu.sh must be run on macOS." >&2
 	exit 1
 fi
 
@@ -15,7 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 INSTANCE_NAME="dev"
 CONTEXT="work"
-TEMPLATE_PATH="$REPO_ROOT/lima/dev-fedora.yaml"
+TEMPLATE_PATH="$REPO_ROOT/lima/dev-ubuntu.yaml"
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
 		shift 2
 		;;
 	-h | --help)
-		echo "Usage: bootstrap/vm/macos-create-fedora.sh [--name dev] [--context work]"
+		echo "Usage: bootstrap/vm/macos-create-ubuntu.sh [--name dev] [--context work]"
 		exit 0
 		;;
 	*)
@@ -55,6 +55,6 @@ fi
 
 limactl start --name="$INSTANCE_NAME" "$TEMPLATE_PATH"
 
-echo "Fedora VM '$INSTANCE_NAME' created."
+echo "Ubuntu VM '$INSTANCE_NAME' created."
 echo "Dev shell:   limactl shell --tty --reconnect --workdir /home/dev --shell /usr/bin/zsh $INSTANCE_NAME"
 echo "Then run chezmoi init --apply david-krentzlin/home-sweet-home as dev."

@@ -9,13 +9,13 @@ fi
 SOURCE_DIR="$(chezmoi source-path)"
 
 for candidate in \
-	"$SOURCE_DIR/bootstrap/vm/macos-create-fedora.sh" \
-	"$SOURCE_DIR/../bootstrap/vm/macos-create-fedora.sh"; do
+	"$SOURCE_DIR/bootstrap/vm/macos-create-ubuntu.sh" \
+	"$SOURCE_DIR/../bootstrap/vm/macos-create-ubuntu.sh"; do
 	if [[ -f "$candidate" ]]; then
 		exec "$candidate" "$@"
 	fi
 done
 
-echo "Error: could not locate bootstrap/vm/macos-create-fedora.sh from chezmoi source path '$SOURCE_DIR'." >&2
+echo "Error: could not locate bootstrap/vm/macos-create-ubuntu.sh from chezmoi source path '$SOURCE_DIR'." >&2
 
 exit 1

@@ -4,22 +4,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if ! command -v dnf >/dev/null 2>&1; then
+if ! command -v apt-get >/dev/null 2>&1; then
 	exit 0
 fi
 
-if rpm -q task2 >/dev/null 2>&1; then
+# Ubuntu 24.04 ships taskwarrior 2.x as `taskwarrior`. The task3 package
+# line would go here once the distro catches up; for now install v2.
+if dpkg -s taskwarrior >/dev/null 2>&1; then
 	exit 0
 fi
+
+export DEBIAN_FRONTEND=noninteractive
 
 if [[ "$(id -u)" -eq 0 ]]; then
-	exec dnf install -y task2
+	apt-get update
+	exec apt-get install -y --no-install-recommends taskwarrior
 fi
 
 if command -v sudo >/dev/null 2>&1; then
-	exec sudo dnf install -y task2
+	sudo apt-get update
+	exec sudo apt-get install -y --no-install-recommends taskwarrior
 fi
 
-echo "Error: task2 is not installed and sudo is unavailable." >&2
+echo "Error: taskwarrior is not installed and sudo is unavailable." >&2
 exit 1
 {{- end }}
