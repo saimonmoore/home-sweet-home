@@ -30,7 +30,7 @@ YAZI
     x           open with chooser
 
   In this setup:
-    files open in Helix
+    files open in Neovim (LazyVim)
     hidden files are shown by default
     preview pane is enabled
 
@@ -54,7 +54,7 @@ LAZYGIT
     c           commit staged changes
     P           push
     p           pull
-    e           open selected file in Helix
+    e           open selected file in Neovim
 
   Branches and commits:
     3           branches panel (or cycle with [ / ])
@@ -131,7 +131,7 @@ SCOOTER
     Space       include or exclude current match
     a           toggle all matches
     v           multiselect mode
-    e           open match in Helix
+    e           open match in Neovim
     Ctrl-h      help
     Ctrl-r      reset back to search screen
     Ctrl-c      quit
@@ -143,13 +143,30 @@ SCOOTER
     Ctrl-l      toggle preview wrapping
 
   In this setup:
-    e opens Helix at the matching line and exits scooter
+    e opens Neovim at the matching line and exits scooter
     syntax highlighting uses Catppuccin Mocha
 
-HELIX INTEGRATION YOU ALREADY HAVE
-  Ctrl-e       open Yazi file chooser
-  Ctrl-r       open Scooter
-  Ctrl-g       open Lazygit
+NEOVIM / LAZYVIM
+  Launch:
+    nvim
+
+  LazyVim ships its own keymap; press <Space> in normal mode
+  to see the which-key popup with every leader binding.
+
+  Frequently used leader bindings (default LazyVim):
+    <Space>        open which-key menu
+    <Space> ff     find files (Telescope)
+    <Space> fg     live grep
+    <Space> e      toggle file explorer (neo-tree)
+    <Space> gg     open lazygit
+    <Space> qq     quit all
+    <Space> l      Lazy plugin manager
+    <Space> cm     Mason (LSP / formatter installer)
+
+  In this setup:
+    Neovim is installed via mise on develop machines
+    config lives in ~/.config/nvim (LazyVim starter)
+    yazi, scooter, and lazygit open files with nvim
 
 PROJECT TAB HELPERS
   ,zdev         zoxide picker -> new Zellij tab with dev layout

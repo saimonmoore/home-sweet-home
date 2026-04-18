@@ -1,7 +1,5 @@
 {{- $needsTaskwarrior := false -}}
 {{- if hasKey . "needs_taskwarrior" }}{{- $needsTaskwarrior = .needs_taskwarrior }}{{- end }}
-{{- $buildHelixFromSource := false -}}
-{{- if hasKey . "build_helix_from_source" }}{{- $buildHelixFromSource = .build_helix_from_source }}{{- end }}
 
 [settings]
 experimental = true
@@ -27,6 +25,7 @@ taskwarrior = "latest"
 {{- end }}
 
 {{- if .develop }}
+neovim = "stable"
 bun = "latest"
 go = "latest"
 ruby = "latest"

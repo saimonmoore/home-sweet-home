@@ -28,8 +28,8 @@ fi
 
 export COLORTERM=truecolor
 PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-export EDITOR=hx
-export VISUAL=hx
+export EDITOR=nvim
+export VISUAL=nvim
 
 if [[ -n "${GOBIN:-}" ]]; then
 	PATH="$GOBIN:$PATH"

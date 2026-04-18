@@ -1,7 +1,7 @@
 # ~/.config/scooter/config.toml
 
 [editor_open]
-command = "hx %file:%line"
+command = "nvim +%line %file"
 exit = true
 
 [preview]

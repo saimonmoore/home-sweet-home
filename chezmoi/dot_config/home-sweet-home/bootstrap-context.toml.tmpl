@@ -1,9 +1,6 @@
 {{- $needsTaskwarrior := false -}}
 {{- if hasKey . "needs_taskwarrior" }}{{- $needsTaskwarrior = .needs_taskwarrior }}{{- end }}
-{{- $buildHelixFromSource := false -}}
-{{- if hasKey . "build_helix_from_source" }}{{- $buildHelixFromSource = .build_helix_from_source }}{{- end }}
 develop = {{ .develop }}
 needs_opencode = {{ .needs_opencode }}
 needs_taskwarrior = {{ $needsTaskwarrior }}
-build_helix_from_source = {{ $buildHelixFromSource }}
 work = {{ if ne .work_username "" }}true{{ else }}false{{ end }}

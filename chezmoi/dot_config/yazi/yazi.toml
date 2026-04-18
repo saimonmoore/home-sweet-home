@@ -12,7 +12,7 @@ linemode = "size"
 
 [opener]
 edit = [
-  { run = 'hx "$@"', block = true, for = "unix" },
+  { run = 'nvim "$@"', block = true, for = "unix" },
 ]
 
 [preview]

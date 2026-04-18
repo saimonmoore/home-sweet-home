@@ -37,7 +37,7 @@ git:
   branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{`{{branchName}}`}} --"
 
 os:
-  editPreset: "helix"
+  editPreset: "nvim"
 
 promptToReturnFromSubprocess: false
 

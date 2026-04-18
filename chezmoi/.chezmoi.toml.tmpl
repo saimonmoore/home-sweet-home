@@ -4,17 +4,11 @@
 {{- $develop := or (eq $developAnswer "y") (eq $developAnswer "yes") (eq $developAnswer "true") (eq $developAnswer "1") -}}
 {{- $needsOpencode := or (eq $needsOpencodeAnswer "y") (eq $needsOpencodeAnswer "yes") (eq $needsOpencodeAnswer "true") (eq $needsOpencodeAnswer "1") -}}
 {{- $needsTaskwarrior := or (eq $needsTaskwarriorAnswer "y") (eq $needsTaskwarriorAnswer "yes") (eq $needsTaskwarriorAnswer "true") (eq $needsTaskwarriorAnswer "1") -}}
-{{- $buildHelixFromSource := false -}}
-{{- if $develop -}}
-{{- $buildHelixFromSourceAnswer := promptStringOnce . "build_helix_from_source" "Should Helix be built from source on this machine" | trim | lower -}}
-{{- $buildHelixFromSource = or (eq $buildHelixFromSourceAnswer "y") (eq $buildHelixFromSourceAnswer "yes") (eq $buildHelixFromSourceAnswer "true") (eq $buildHelixFromSourceAnswer "1") -}}
-{{- end -}}
 {{- $workUsername := promptStringOnce . "work_username" "Work username (leave blank if not applicable)" -}}
 [data]
 develop = {{ $develop }}
 needs_opencode = {{ $needsOpencode }}
 needs_taskwarrior = {{ $needsTaskwarrior }}
-build_helix_from_source = {{ $buildHelixFromSource }}
 name = {{ promptStringOnce . "name" "Git author name" | quote }}
 email = {{ promptStringOnce . "email" "Git author email" | quote }}
 github_username = {{ promptStringOnce . "github_username" "GitHub username" | quote }}

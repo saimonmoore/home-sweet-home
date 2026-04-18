@@ -41,13 +41,12 @@ mise install
 chezmoi apply
 ```
 
-This also installs the terminal IDE support managed here for Helix, Zellij, Lazygit, Yazi, and related editor tooling.
+This also installs the terminal IDE support managed here for Neovim (LazyVim), Zellij, Lazygit, Yazi, and related editor tooling.
 
 When `chezmoi` prompts as `dev`, answer:
 
 - `Will you develop on this machine?` -> `yes`
 - `Will you need opencode on this machine?` -> `yes` if you want OpenCode in the VM, otherwise `no`
-- `Should Helix be built from source on this machine?` -> `yes` if you want source-built Helix
 - fill in the same identity values as on the host
 
 Open the VM as `dev` when you need a shell.
@@ -204,12 +203,12 @@ This installs or updates the Scala toolchain expected by the VM setup:
 
 ## Terminal IDE
 
-`chezmoi` now manages the Helix, Zellij, Lazygit, Yazi, and Scooter config from this repo directly.
+`chezmoi` manages the Zellij, Lazygit, Yazi, and Scooter config from this repo directly. The editor is Neovim with the [LazyVim](https://www.lazyvim.org) starter.
 
-On development machines, `mise install` also pulls the editor-side tools managed here, including `lazygit`, `zellij`, `yazi`, `scooter`, `delta`, `golangci-lint`, `prettier`, and `emmet-ls`.
+On development machines, `mise install` pulls Neovim (stable) plus the editor-side tools managed here, including `lazygit`, `zellij`, `yazi`, `scooter`, `delta`, `golangci-lint`, `prettier`, and `emmet-ls`.
 
-If you opt into source-built Helix in the chezmoi prompts, Helix is built from the official repository on both Linux and macOS after Rust is available, so run `chezmoi apply` once after `mise install` during bootstrap.
+On first `chezmoi apply` on a development machine, the [LazyVim starter](https://github.com/LazyVim/starter) is cloned into `~/.config/nvim` (with its `.git` directory removed). Open `nvim` once afterwards to let `lazy.nvim` install plugins and treesitter parsers. Customize `~/.config/nvim` directly from there — it's yours.
 
-You can manually install or update that source build later with `,helix-install`.
+To put your customized nvim config under chezmoi management later, run `chezmoi add ~/.config/nvim` and commit.
 
 Theme assets for Yazi and Scooter are managed directly in this repo.

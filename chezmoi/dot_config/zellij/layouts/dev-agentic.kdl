@@ -6,7 +6,7 @@ layout {
     }
 
     pane split_direction="vertical" {
-        pane name="hx" command="hx" size="70%" focus=true
+        pane name="nvim" command="nvim" size="70%" focus=true
         pane name="opencode" command="opencode" size="30%"
     }
 }
