@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 # One-shot bootstrap for a fresh macOS host.
 #
+# Usage:
+#   install.sh              # normal run (idempotent)
+#   install.sh --reset      # wipe chezmoi prompt answers + rendered
+#                           # config so you can answer fresh, then
+#                           # re-clone/re-apply everything
+#   install.sh --nuke       # also delete the chezmoi source clone at
+#                           # ~/.local/share/chezmoi — forces a fresh
+#                           # git clone. Use if the local clone is
+#                           # corrupted or in a broken state.
+#
 # Installs Homebrew (if missing), installs chezmoi, then either:
 #   - clones and applies saimonmoore/home-sweet-home via
 #     `chezmoi init --apply` on a fresh machine, or
@@ -10,12 +20,29 @@
 # Brewfile, clone the nb notebook, and sync openskills skills.
 #
 # Re-running this script is safe and picks up the latest home-sweet-home
-# from GitHub each time. If you ran it once and the shell that invoked it
-# has since exited (so PATH doesn't include Homebrew), the script detects
-# an existing /opt/homebrew or /usr/local brew install and sources
-# shellenv without reinstalling Homebrew.
+# from GitHub each time. If you ran it once and the shell that invoked
+# it has since exited (so PATH doesn't include Homebrew), the script
+# detects an existing /opt/homebrew or /usr/local brew install and
+# sources shellenv without reinstalling Homebrew.
 
 set -euo pipefail
+
+reset=false
+nuke=false
+for arg in "$@"; do
+	case "$arg" in
+		--reset) reset=true ;;
+		--nuke)  reset=true; nuke=true ;;
+		-h|--help)
+			sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
+			exit 0
+			;;
+		*)
+			printf 'Unknown argument: %s\n' "$arg" >&2
+			exit 2
+			;;
+	esac
+done
 
 log() { printf '==> %s\n' "$*"; }
 err() { printf 'Error: %s\n' "$*" >&2; exit 1; }
@@ -23,6 +50,9 @@ err() { printf 'Error: %s\n' "$*" >&2; exit 1; }
 if [[ "$(uname -s)" != "Darwin" ]]; then
 	err "this installer targets macOS. Inside the Ubuntu VM, see README.md for the manual chezmoi init flow."
 fi
+
+chezmoi_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi"
+chezmoi_default_source="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
 
 source_brew_shellenv() {
 	if [[ -x /opt/homebrew/bin/brew ]]; then
@@ -57,11 +87,30 @@ else
 	log "chezmoi already installed"
 fi
 
+# --- Optional reset ---------------------------------------------------------
+# --reset: wipe chezmoi's rendered config + prompt state so the next init
+#          re-prompts (you can change your answers).
+# --nuke:  also delete the chezmoi source clone, forcing a fresh git clone.
+if [[ "$reset" == true ]]; then
+	log "Removing chezmoi config + state to force re-prompt"
+	rm -f "$chezmoi_config_dir/chezmoi.toml" \
+	      "$chezmoi_config_dir/chezmoistate.boltdb"
+fi
+if [[ "$nuke" == true ]]; then
+	chezmoi_existing_source="$(chezmoi source-path 2>/dev/null || true)"
+	for dir in "$chezmoi_existing_source" "$chezmoi_default_source"; do
+		if [[ -n "$dir" && -d "$dir" ]]; then
+			log "Removing chezmoi source clone at $dir"
+			rm -rf "$dir"
+		fi
+	done
+fi
+
 # --- Apply dotfiles ---------------------------------------------------------
-# On a fresh machine run `chezmoi init --apply` so the source gets cloned.
-# On an already-initialised machine run `chezmoi update` so we pull the
-# latest home-sweet-home from GitHub before applying — otherwise a re-run
-# would silently re-apply a stale local clone.
+# Fresh (or just-reset) machine: `chezmoi init --apply` so the source gets
+# cloned and prompts are answered. Already-initialised machine: `chezmoi
+# update` pulls the latest home-sweet-home from GitHub before applying —
+# otherwise a re-run would silently re-apply a stale local clone.
 chezmoi_source="$(chezmoi source-path 2>/dev/null || true)"
 if [[ -n "$chezmoi_source" && -d "$chezmoi_source/.git" ]]; then
 	log "chezmoi source already initialised at $chezmoi_source — running 'chezmoi update'"
