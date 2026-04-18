@@ -1,0 +1,6 @@
+{
+  "source": "vercel-labs/agent-browser",
+  "sourceType": "git",
+  "repoUrl": "https://github.com/vercel-labs/agent-browser",
+  "subpath": "skills/agent-browser"
+}

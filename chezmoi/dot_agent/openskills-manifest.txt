@@ -1,0 +1,33 @@
+# List of openskills skill names to install on this machine.
+# One skill per line. Comments start with '#'. Blanks ignored.
+# Source for each skill comes from chezmoi/dot_agent/skills/<name>/.openskills.json
+# which is dropped next to the skill by openskills on install.
+
+agent-browser
+brainstorming
+composition-patterns
+dispatching-parallel-agents
+executing-plans
+findings-fixings-browser-qa-loop
+finishing-a-development-branch
+frontend-design
+frontend-design-daisyui
+i18n-phoenix-gettext
+mcp-builder
+napkin
+phoenix-liveview-daisyui-development
+prepare-peer-review
+react-best-practices
+receiving-code-review
+requesting-code-review
+schedule-later-task
+subagent-driven-development
+systematic-debugging
+systematic-qa-testing
+test-driven-development
+using-git-worktrees
+using-superpowers
+verification-before-completion
+web-design-guidelines
+writing-plans
+writing-skills

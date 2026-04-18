@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# Reconcile ~/.agent/skills with the committed openskills manifest.
+#
+#   1. Read the skill names from ~/.agent/openskills-manifest.txt
+#   2. For each, look up its source in the committed
+#      ~/.agent/skills/<name>/.openskills.json, dedupe, and
+#      `npx openskills install <source> --universal`
+#   3. Prune any skill dir on disk whose name is not in the manifest
+#   4. Refresh ~/.agent/AGENTS.md via `npx openskills sync`
+
+set -uo pipefail
+
+SKILLS_ROOT="$HOME/.agent/skills"
+MANIFEST="$HOME/.agent/openskills-manifest.txt"
+AGENTS_MD="$HOME/.agent/AGENTS.md"
+
+if ! command -v npx >/dev/null 2>&1; then
+	echo "Error: npx missing. Install node on the host (Brewfile) or run 'mise install' in the VM." >&2
+	exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+	echo "Error: jq missing." >&2
+	exit 1
+fi
+
+if [[ ! -f "$MANIFEST" ]]; then
+	echo "No openskills manifest at $MANIFEST; skipping agent skills sync."
+	exit 0
+fi
+
+mapfile -t desired < <(
+	sed -E 's/#.*//' "$MANIFEST" \
+		| awk 'NF > 0 { print $1 }' \
+		| sort -u
+)
+
+if [[ ${#desired[@]} -eq 0 ]]; then
+	echo "openskills manifest is empty; skipping."
+	exit 0
+fi
+
+# Collect unique sources from the committed .openskills.json files.
+declare -A sources=()
+for name in "${desired[@]}"; do
+	meta="$SKILLS_ROOT/$name/.openskills.json"
+	if [[ ! -f "$meta" ]]; then
+		echo "Warning: no .openskills.json for '$name' at $meta (skipping install lookup)." >&2
+		continue
+	fi
+	src=$(jq -r '.source // empty' "$meta")
+	if [[ -z "$src" ]]; then
+		echo "Warning: no 'source' in $meta" >&2
+		continue
+	fi
+	sources["$src"]=1
+done
+
+if [[ ${#sources[@]} -eq 0 ]]; then
+	echo "No installable sources found; skipping openskills install."
+	exit 0
+fi
+
+failed=0
+for src in "${!sources[@]}"; do
+	echo "==> openskills install $src"
+	if ! npx openskills install "$src" --universal; then
+		failed=$((failed+1))
+	fi
+done
+
+# Prune: any skill dir not in the manifest gets removed.
+if [[ -d "$SKILLS_ROOT" ]]; then
+	mapfile -t installed < <(
+		find "$SKILLS_ROOT" -mindepth 1 -maxdepth 1 -type d \
+			-exec basename {} \; 2>/dev/null \
+			| sort -u
+	)
+
+	mapfile -t to_remove < <(
+		comm -23 \
+			<(printf '%s\n' "${installed[@]}") \
+			<(printf '%s\n' "${desired[@]}")
+	)
+
+	for name in "${to_remove[@]}"; do
+		echo "==> openskills remove $name (not in manifest)"
+		npx openskills remove "$name" || true
+	done
+fi
+
+echo "==> openskills sync -o $AGENTS_MD"
+npx openskills sync -y -o "$AGENTS_MD" || true
+
+if (( failed > 0 )); then
+	echo "$failed source(s) failed to install; re-run this hook after fixing." >&2
+	exit 1
+fi

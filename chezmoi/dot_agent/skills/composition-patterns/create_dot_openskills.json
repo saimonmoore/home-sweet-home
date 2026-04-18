@@ -1,0 +1,6 @@
+{
+  "source": "git@github.com:vercel-labs/agent-skills.git",
+  "sourceType": "git",
+  "repoUrl": "git@github.com:vercel-labs/agent-skills.git",
+  "subpath": "skills/composition-patterns"
+}
