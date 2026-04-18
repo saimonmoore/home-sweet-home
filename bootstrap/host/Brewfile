@@ -56,6 +56,7 @@ brew "wget"
 brew "worktrunk"
 brew "zoxide"
 brew "hashicorp/tap/terraform"
+brew "mas"
 brew "xwmx/taps/nb"
 
 cask "1password-cli"
@@ -97,3 +98,6 @@ cask "teamviewer"
 cask "telegram"
 cask "the-unarchiver"
 cask "visual-studio-code"
+
+mas "Xcode", id: 497799835
+mas "Numbers", id: 409203825

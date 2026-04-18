@@ -321,6 +321,35 @@ To trim or extend the host brew set, edit `bootstrap/host/Brewfile`
 directly. The `run_once_after_host-brew-bundle.sh.tmpl` hook runs
 `brew bundle` against that file on every macOS host apply.
 
+## Mac App Store apps (`mas`)
+
+`brew "mas"` installs the Mac App Store CLI; the Brewfile then lists
+`mas "Xcode"` and `mas "Numbers"` so they are pulled in alongside the
+casks. `mas` needs you to be signed into the App Store once per
+machine before the first `brew bundle` — if you aren't, those entries
+will error cleanly and the rest of the bundle still runs. Sign in,
+re-apply, done.
+
+## Manual installs
+
+Apps that don't automate cleanly via Homebrew or `mas`. Install these
+by hand on a fresh macOS host after `bootstrap/host/install.sh`
+finishes.
+
+**No cask / no MAS entry:**
+- Guitar Pro 7 — the `guitar-pro` cask is v8+; install v7 manually
+  from your license.
+- Hofmann — install from vendor site.
+- Paseo — install manually.
+
+**Built-in / bundled (no action needed):**
+- Safari, Utilities folder, Chrome Apps.localized — preinstalled or
+  auto-created by Chrome.
+- iTermAI, iTermBrowserPlugin — enabled from within iTerm2
+  preferences.
+- Proton Mail Uninstaller — ships alongside Proton Mail.
+- Claude Code URL Handler — installed by the Claude Code CLI.
+
 ## Bootstrap scripts
 
 `bootstrap/host/`:
