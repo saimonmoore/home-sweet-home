@@ -36,7 +36,6 @@ variables used throughout the repo. See `chezmoi/.chezmoi.toml.tmpl`.
 | Will you need opencode?      | `needs_opencode`           | Installs opencode via mise, adds opencode zsh rc + config |
 | Git author name / email      | `name`, `email`            | Written into `dot_gitconfig.tmpl`                         |
 | GitHub username              | `github_username`          | `[github] user =` and `,ghclone` target layout            |
-| Work username                | `work_username`            | Gates work-specific config (JFrog, Brewfile, URL rewrites) |
 
 Taskwarrior is also conditional (`needs_taskwarrior`) — check the template
 for the exact prompt set.
@@ -46,7 +45,7 @@ for the exact prompt set.
 
 **To adapt:** edit `chezmoi/.chezmoi.toml.tmpl` to rename/remove prompts, then
 update every `.tmpl` file that branches on the removed variable. The easiest
-way to find them is `grep -r '{{ \.work_username' chezmoi/`.
+way to find them is `grep -r '{{ \.<var_name>' chezmoi/`.
 
 ## Host vs VM split
 
@@ -237,7 +236,7 @@ mise's `version = "x.y.z"` syntax.
 
 ### JFrog credentials sync
 
-Work-specific; only meaningful on machines with `work_username` set.
+Optional; set up for private artifact-registry access in the dev VM.
 
 1. Credentials live in 1Password on the host; `,jfrog_oidc_env` exports
    `JFROG_OIDC_USER` / `JFROG_OIDC_TOKEN`.
@@ -276,16 +275,17 @@ inside the VM to complete the OAuth callback.
 
 `chezmoi/dot_gitconfig.tmpl` sets:
 
-- Identity and signing key (ed25519 on VM, rsa on work host)
-- SSH GPG signing, `osxkeychain` helper on the work host
-- URL rewrites inside the VM for `github.com` and XING's Gitea
+- Identity and signing key (ed25519 everywhere; distinct keys per context)
+- SSH GPG signing, `osxkeychain` helper on the host
+- URL rewrite inside the VM mapping `https://github.com/` to the SSH form
 - `push.default = current`, `push.autoSetupRemote = true`,
   `pull.rebase = false`, `init.defaultBranch = main`
 - Editor = `nvim`
-- Aliases: `ci co st br`
+- A curated alias set covering log/status/commit/fixup helpers and a
+  `pam*` family of fzf-driven pickers. `[help] autocorrect`, `[rebase]
+  autosquash`, and `[rerere] enabled` are turned on.
 
-Remove the XING-specific URL rewrite + credential block if you don't work at
-XING. The `,g*` diagnostics scripts are standalone bash and portable as-is.
+The `,g*` diagnostics scripts are standalone bash and portable as-is.
 
 ## Taskwarrior (optional)
 
@@ -297,7 +297,7 @@ Catppuccin Mocha Black theme. Custom urgency coefficients bias `+bug`,
 
 - Brewfile: `bootstrap/host/Brewfile.personal`. Runs via
   `run_once_after_host-brew-bundle.sh.tmpl` only when
-  `develop=false AND darwin AND work_username`.
+  `develop=false AND darwin`.
 - Terminal emulator: Ghostty (brew cask). WezTerm config is present but
   ignored on macOS — it's kept for reference/alt use.
 - Lazygit's macOS config lives under `chezmoi/Library/Application Support/`
@@ -333,7 +333,7 @@ chezmoi run hooks (in `chezmoi/.chezmoiscripts/`):
 | Zellij + layouts               | Keep or swap for tmux (you'd rewrite `,zlayout`, `,zdev`, `,zagent`) |
 | OpenCode as AI agent           | Fully opt-in                                    |
 | Taskwarrior                    | Fully opt-in                                    |
-| JFrog credentials sync         | Work-specific; drop if not needed               |
+| JFrog credentials sync         | Optional; drop if you don't use a private artifact registry |
 | VM `~/code` repo layout        | Change in `,ghclone` if you want a flat layout  |
 | No VM mounts                   | Add `mounts:` in `dev-ubuntu.yaml` if you want shared code with the host |
 | zsh only                       | Swap means rewriting every file in `dot_config/zsh/rc.d/` |

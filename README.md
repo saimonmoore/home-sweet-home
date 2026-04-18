@@ -18,7 +18,7 @@ When `chezmoi` prompts, answer:
 
 - `Will you develop on this machine?` -> `no`
 - `Will you need opencode on this machine?` -> `no`
-- fill in `Git author name`, `Git author email`, `GitHub username`, and `Work username`
+- fill in `Git author name`, `Git author email`, and `GitHub username`
 
 When it finishes, open a new terminal and run `,create-vm` to create the
 dev VM, then follow the VM setup below. The installer also prints these
@@ -26,8 +26,6 @@ next steps at the end.
 
 
 ## First-Time Setup
-
-### Work
 
 #### Host (manual alternative)
 

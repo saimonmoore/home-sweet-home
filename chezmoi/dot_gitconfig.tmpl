@@ -1,11 +1,10 @@
 {{- $host := not .develop -}}
-{{- $work := ne .work_username "" -}}
 [user]
 	name = {{ .name | quote }}
 	email = {{ .email | quote }}
-{{- if and $host $work }}
-	signingkey = ~/.ssh/id_rsa.pub
-{{- else if not $host }}
+{{- if $host }}
+	signingkey = ~/.ssh/id_ed25519_personal.pub
+{{- else }}
 	signingkey = ~/.ssh/id_ed25519.pub
 {{- end }}
 
@@ -72,7 +71,7 @@
 	excludesfile = ~/.gitignore
 	editor = nvim
 
-{{- if and $host $work }}
+{{- if $host }}
 [commit]
 	gpgsign = true
 
@@ -85,7 +84,7 @@
 [credential]
 	helper = osxkeychain
 
-{{- else if not $host }}
+{{- else }}
 [commit]
 	gpgsign = true
 
@@ -95,23 +94,9 @@
 [url "git@github.com:"]
 	insteadOf = https://github.com/
 
-[url "git@source.xing.com:"]
-	insteadOf = https://source.xing.com/
-
-{{- end }}
-
-{{- if $work }}
-[credential "https://source.xing.com"]
-	username = {{ .work_username | quote }}
 {{- end }}
 
 {{- if ne .github_username "" }}
-[github "source.xing.com"]
-	user = {{ .github_username | quote }}
-
-[github "api.source.xing.com"]
-	user = {{ .github_username | quote }}
-
 [github]
 	user = {{ .github_username | quote }}
 {{- end }}

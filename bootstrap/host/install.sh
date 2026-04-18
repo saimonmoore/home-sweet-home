@@ -4,7 +4,7 @@
 # Installs Homebrew (if missing), installs chezmoi (needed to apply the
 # dotfiles — it is also listed in the Brewfile for later installs), then
 # runs `chezmoi init --apply saimonmoore/home-sweet-home`. After chezmoi
-# finishes, the post-apply hook on work hosts runs `brew bundle` against
+# finishes, the post-apply hook on macOS hosts runs `brew bundle` against
 # bootstrap/host/Brewfile.personal to install the rest of the host tooling.
 #
 # Re-running this script is safe: each step skips work that's already done.
