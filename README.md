@@ -29,11 +29,9 @@ Before running the installer:
    through it when prompted and re-run if needed.
 3. **Backed-up SSH keys** reachable from the new machine (iCloud,
    external drive, password manager, etc.). After the installer
-   finishes you'll copy these into `~/.ssh/`:
+   finishes you'll copy this into `~/.ssh/`:
    - `id_ed25519_personal` (+ `.pub`) — primary personal GitHub
      identity, signing key.
-   - `id_ed25519_jpb` (+ `.pub`) — secondary GitHub account (routed
-     via the `github-jpb` SSH alias).
 4. **A few chezmoi prompt answers** ready:
    - Git author name + email
    - Personal GitHub username (`saimonmoore`)
@@ -69,15 +67,13 @@ occasionally pause for macOS to ask permission for a cask install
 
 1. **Open a new terminal.** Shell PATH changes and integrations load
    on shell start, not mid-session.
-2. **Drop your SSH keys into `~/.ssh/`:**
+2. **Drop your SSH key into `~/.ssh/`:**
    ```bash
    chmod 700 "$HOME/.ssh"
    cp <backup>/id_ed25519_personal     "$HOME/.ssh/"
    cp <backup>/id_ed25519_personal.pub "$HOME/.ssh/"
-   cp <backup>/id_ed25519_jpb          "$HOME/.ssh/"
-   cp <backup>/id_ed25519_jpb.pub      "$HOME/.ssh/"
-   chmod 600 "$HOME/.ssh"/id_ed25519_*
-   chmod 644 "$HOME/.ssh"/id_ed25519_*.pub
+   chmod 600 "$HOME/.ssh"/id_ed25519_personal
+   chmod 644 "$HOME/.ssh"/id_ed25519_personal.pub
    ```
    Confirm with `,verify`.
 3. **Create the dev VM:** `,create-vm`. This provisions lima with the
