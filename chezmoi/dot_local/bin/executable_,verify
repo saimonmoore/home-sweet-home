@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# Verify a home-sweet-home install is healthy on the macOS host.
+# Safe to re-run anytime. Exits non-zero if any check fails.
+
+set -uo pipefail
+
+# Personal-fork expectations; edit these if the fork identity changes.
+readonly NB_NOTEBOOK="home"
+readonly SSH_KEY_MARKER="id_ed25519_personal"
+
+pass=0
+fail=0
+warn=0
+
+ok()      { printf '  \033[32m✓\033[0m %s\n' "$1"; pass=$((pass+1)); }
+bad()     { printf '  \033[31m✗\033[0m %s\n' "$1"; fail=$((fail+1)); }
+warned()  { printf '  \033[33m!\033[0m %s\n' "$1"; warn=$((warn+1)); }
+section() { printf '\n\033[1m%s\033[0m\n' "$1"; }
+
+section "Platform"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+	ok "macOS host"
+else
+	warned "non-macOS — host-specific checks will be skipped"
+fi
+
+section "Core host tooling"
+for t in brew chezmoi git; do
+	if command -v "$t" >/dev/null 2>&1; then
+		ok "$t installed"
+	else
+		bad "$t is missing"
+	fi
+done
+
+section "Brewfile tools (spot-check)"
+for t in eza fzf ripgrep fd lazygit lima gh jq bat nb; do
+	if command -v "$t" >/dev/null 2>&1; then
+		ok "$t"
+	else
+		bad "$t is missing"
+	fi
+done
+
+section "chezmoi state"
+if command -v chezmoi >/dev/null 2>&1; then
+	pending=$(chezmoi status 2>/dev/null | sed '/^$/d' | wc -l | tr -d ' ')
+	if [[ "$pending" == "0" ]]; then
+		ok "no pending changes"
+	else
+		warned "$pending file(s) differ — run 'chezmoi apply'"
+	fi
+fi
+
+section "Git config"
+if git config --global --get alias.pam >/dev/null 2>&1; then
+	ok "custom aliases loaded (git pam)"
+else
+	bad "git aliases not loaded"
+fi
+if [[ "$(git config --global --get commit.gpgsign 2>/dev/null)" == "true" ]]; then
+	ok "commit signing enabled"
+else
+	warned "commit.gpgsign is not true"
+fi
+
+section "SSH config"
+if [[ -f "$HOME/.ssh/config" ]] && grep -q "$SSH_KEY_MARKER" "$HOME/.ssh/config" 2>/dev/null; then
+	ok "$SSH_KEY_MARKER referenced in ~/.ssh/config"
+	if [[ -f "$HOME/.ssh/$SSH_KEY_MARKER" ]]; then
+		ok "$HOME/.ssh/$SSH_KEY_MARKER key file present"
+	else
+		bad "$HOME/.ssh/$SSH_KEY_MARKER key file missing — copy it from your backup"
+	fi
+else
+	bad "$SSH_KEY_MARKER not found in ~/.ssh/config"
+fi
+
+section "nb notebook ($NB_NOTEBOOK)"
+if command -v nb >/dev/null 2>&1; then
+	if [[ -d "$HOME/.nb/$NB_NOTEBOOK/.git" ]]; then
+		ok "~/.nb/$NB_NOTEBOOK is a git repo"
+	else
+		bad "~/.nb/$NB_NOTEBOOK not initialized — re-run 'chezmoi apply'"
+	fi
+fi
+
+section "Lima dev VM"
+if command -v limactl >/dev/null 2>&1; then
+	if limactl list --quiet 2>/dev/null | grep -Fxq "dev"; then
+		ok "dev VM exists"
+	else
+		warned "dev VM not created yet — run ',create-vm'"
+	fi
+else
+	bad "limactl not installed"
+fi
+
+section "Desktop quick-reference"
+if [[ -f "$HOME/Desktop/home-sweet-home.md" ]]; then
+	ok "~/Desktop/home-sweet-home.md present"
+else
+	warned "desktop README missing — run 'chezmoi apply'"
+fi
+
+printf '\n'
+if (( fail == 0 )); then
+	printf '\033[32m✓ %d passing\033[0m' "$pass"
+else
+	printf '\033[31m✗ %d failing\033[0m' "$fail"
+fi
+if (( warn > 0 )); then
+	printf ' · \033[33m%d warning(s)\033[0m' "$warn"
+fi
+printf '\n\n'
+
+exit $(( fail > 0 ? 1 : 0 ))

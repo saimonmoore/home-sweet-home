@@ -47,6 +47,17 @@ fi
 log "Running: chezmoi init --apply saimonmoore/home-sweet-home"
 chezmoi init --apply saimonmoore/home-sweet-home
 
+# --- Verify -----------------------------------------------------------------
+verify_cmd="$HOME/.local/bin/,verify"
+if [[ -x "$verify_cmd" ]]; then
+	log "Running ,verify"
+	# Keep going even if some checks warn or fail — the summary tells you
+	# what's left, and the next-steps block below still needs to print.
+	"$verify_cmd" || true
+else
+	printf 'Warning: ,verify not found at %s — skipping.\n' "$verify_cmd" >&2
+fi
+
 # --- Next steps -------------------------------------------------------------
 cat <<'NEXT'
 
