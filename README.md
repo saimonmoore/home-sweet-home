@@ -12,7 +12,7 @@ Dotfiles for my host plus an isolated Ubuntu VM for development.
 Install Homebrew first. `chezmoi` will run `brew bundle` once on the macOS host.
 
 ```bash
-chezmoi init --apply david-krentzlin/home-sweet-home
+chezmoi init --apply saimon-moore/home-sweet-home
 ,create-vm
 ```
 
@@ -36,7 +36,7 @@ Run inside the VM as `dev`:
 mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
 ssh-keygen -q -t ed25519 -N '' -C "dev@dev" -f "$HOME/.ssh/id_ed25519"
-chezmoi init --apply david-krentzlin/home-sweet-home
+chezmoi init --apply saimon-moore/home-sweet-home
 mise install
 chezmoi apply
 ```
@@ -68,7 +68,7 @@ Every machine also gets:
 - `,chezmoi-init` to run `chezmoi apply`
 - `,chezmoi-update` to run `chezmoi update`
 
-Use `david-krentzlin/home-sweet-home` with `chezmoi init`. Username-only shorthand resolves to `david-krentzlin/dotfiles`, which is not this repo.
+Use `saimon-moore/home-sweet-home` with `chezmoi init`. Username-only shorthand resolves to `saimon-moore/dotfiles`, which is not this repo.
 
 ## OpenCode Browser Auth In The VM
 
