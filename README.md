@@ -108,7 +108,6 @@ That delivers the auth callback to the OpenCode process running inside the VM.
 - Keep repos under `~/code` on the VM
 - Pull and apply host changes with `,chezmoi-update`
 - Pull and apply VM changes with `,chezmoi-update` as `dev`
-- Run `,setup-scala` in the VM after syncing JFrog credentials when you need Scala/Metals tooling
 - Clone GitHub repos via SSH into `~/code/github/<owner>/<repo>` with `,ghclone owner/repository`
 - Use `,ghotspots`, `,gauthors`, `,gbugs`, `,gactivity`, `,gfire`, and `,gbranches` for quick git repo diagnostics
 - For OpenCode browser auth in the VM, finish login on the host and `curl` the final localhost callback URL from inside the VM
@@ -171,35 +170,9 @@ Sync credentials for a VM user with:
 ,sync-jfrog-to-vm --host your.jfrog.example.com
 ```
 
-The default realm is `Artifactory Realm`. If `sbt` itself needs authenticated bootstrap access and your setup uses a different realm, pass `--realm` explicitly.
+If Ruby gems use a different host than the primary JFrog host, pass `--ruby-host` too.
 
-If you are not sure which realm JFrog is using, inspect the `WWW-Authenticate` response header from a protected repository URL and copy the realm value.
-
-If Ruby gems use a different host than Scala/sbt, pass `--ruby-host` too.
-
-The sync writes VM-local files only:
-
-- `~/.config/home-sweet-home/jfrog-oidc.env`
-- `~/.ivy2/.credentials`
-- `~/.config/coursier/credentials.properties`
-
-On VM work shells, `SBT_CREDENTIALS` and `COURSIER_CREDENTIALS` are exported automatically when those files exist.
-
-## Setup Scala In The VM
-
-After syncing JFrog credentials into the VM, run:
-
-```bash
-,setup-scala
-```
-
-This installs or updates the Scala toolchain expected by the VM setup:
-
-- trust and install the current `mise` tool config
-- add a `helm-ls` symlink when `helm_ls` is installed via `mise`
-- install `sbt` and `metals` via `cs`
-
-`COURSIER_CREDENTIALS` and `SBT_CREDENTIALS` are picked up from the JFrog files synced into the VM.
+The sync writes `~/.config/home-sweet-home/jfrog-oidc.env` in the VM, which the VM shell sources automatically. It exposes `JFROG_OIDC_USER`, `JFROG_OIDC_TOKEN`, `JFROG_HOST`, `JFROG_REALM`, and a Bundler `BUNDLE_<host>` variable.
 
 ## Terminal IDE
 

@@ -3,14 +3,6 @@ if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/home-sweet-home/jfrog-oidc.env" ]]; 
 	source "${XDG_CONFIG_HOME:-$HOME/.config}/home-sweet-home/jfrog-oidc.env"
 fi
 
-if [[ -f "$HOME/.ivy2/.credentials" ]]; then
-	export SBT_CREDENTIALS="$HOME/.ivy2/.credentials"
-fi
-
-if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/coursier/credentials.properties" ]]; then
-	export COURSIER_CREDENTIALS="${XDG_CONFIG_HOME:-$HOME/.config}/coursier/credentials.properties"
-fi
-
 {{- if $host }}
 ,jfrog_oidc_env() {
 	echo "Exporting jfrog credentials from 1Password"
@@ -25,18 +17,6 @@ fi
 		echo "JFrog OIDC environment is loaded"
 	else
 		echo "JFrog OIDC environment is not loaded"
-	fi
-
-	if [[ -f "$HOME/.ivy2/.credentials" ]]; then
-		echo "sbt credentials file present"
-	else
-		echo "sbt credentials file missing"
-	fi
-
-	if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/coursier/credentials.properties" ]]; then
-		echo "Coursier credentials file present"
-	else
-		echo "Coursier credentials file missing"
 	fi
 }
 {{- end }}

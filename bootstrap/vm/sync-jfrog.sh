@@ -105,13 +105,11 @@ trap cleanup EXIT
 	cat <<'EOF'
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 hsh_config_dir="$config_home/home-sweet-home"
-coursier_dir="$config_home/coursier"
-ivy_dir="$HOME/.ivy2"
 bundle_env_host="${RUBY_HOST//-/___}"
 bundle_env_host="${bundle_env_host//./__}"
 bundle_env_key="BUNDLE_${bundle_env_host^^}"
 
-install -d -m 700 "$hsh_config_dir" "$coursier_dir" "$ivy_dir"
+install -d -m 700 "$hsh_config_dir"
 
 printf "export JFROG_OIDC_USER=%q\n" "$JFROG_OIDC_USER" > "$hsh_config_dir/jfrog-oidc.env"
 printf "export JFROG_OIDC_TOKEN=%q\n" "$JFROG_OIDC_TOKEN" >> "$hsh_config_dir/jfrog-oidc.env"
@@ -119,12 +117,6 @@ printf "export JFROG_HOST=%q\n" "$JFROG_HOST" >> "$hsh_config_dir/jfrog-oidc.env
 printf "export JFROG_REALM=%q\n" "$JFROG_REALM" >> "$hsh_config_dir/jfrog-oidc.env"
 printf "export %s=%q\n" "$bundle_env_key" "$BUNDLE_CREDENTIALS_ENCODED" >> "$hsh_config_dir/jfrog-oidc.env"
 chmod 600 "$hsh_config_dir/jfrog-oidc.env"
-
-printf "realm=%s\nhost=%s\nuser=%s\npassword=%s\n" "$JFROG_REALM" "$JFROG_HOST" "$JFROG_OIDC_USER" "$JFROG_OIDC_TOKEN" > "$ivy_dir/.credentials"
-chmod 600 "$ivy_dir/.credentials"
-
-printf "jfrog.username=%s\njfrog.password=%s\njfrog.host=%s\n" "$JFROG_OIDC_USER" "$JFROG_OIDC_TOKEN" "$JFROG_HOST" > "$coursier_dir/credentials.properties"
-chmod 600 "$coursier_dir/credentials.properties"
 EOF
 } >"$TMP_REMOTE_SCRIPT"
 

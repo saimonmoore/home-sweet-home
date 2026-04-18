@@ -19,7 +19,7 @@ The repo is split into three top-level folders:
 | Folder        | Purpose                                                      |
 |---------------|--------------------------------------------------------------|
 | `chezmoi/`    | Templated dotfiles (zsh, Zellij, Yazi, Lazygit, etc.) |
-| `bootstrap/`  | One-shot scripts: `host/` (Brewfile) and `vm/` (VM create, JFrog sync, Scala setup) |
+| `bootstrap/`  | One-shot scripts: `host/` (Brewfile) and `vm/` (VM create, JFrog sync) |
 | `lima/`       | Lima VM definition (`dev-ubuntu.yaml`) and provisioning (`dev-ubuntu-system.sh`) |
 
 `.chezmoiscripts/` under `chezmoi/` holds `run_once` / `run_after` hooks that
@@ -55,7 +55,7 @@ ignore list in `chezmoi/.chezmoiignore.tmpl` is the source of truth for
 which files land where:
 
 - Host-only (when `develop=false`) skips `.local/bin/,dev`, `,create-vm`,
-  `,sync-jfrog-to-vm`, most editor/IDE tools, the `10_java` zsh rc.
+  `,sync-jfrog-to-vm`, most editor/IDE tools.
 - VM-only skips `.ssh/config`, `.npmrc`, `.yarnrc*`, the `Library/` folder,
   the `05_homebrew` zsh rc.
 - `needs_opencode=false` removes `dot_config/opencode/`.
@@ -110,7 +110,6 @@ All rc fragments live in `chezmoi/dot_config/zsh/rc.d/`:
 | `10_tools`           | mise activate, starship, fzf, zoxide, eza/bat aliases, zsh-autosuggestions |
 | `20_apps`            | short aliases: `g=lazygit`, `e=yazi`, `t=task`, …     |
 | `05_homebrew.tmpl`   | host only (Homebrew path)                             |
-| `10_java`            | VM only (Java env for Scala)                          |
 | `20_jfrog.tmpl`      | exports JFrog creds if synced                         |
 | `20_opencode`        | opencode bootstrap (if enabled)                       |
 
@@ -141,7 +140,6 @@ system binaries. Inventory:
 | `,gfire`              | commits mentioning "revert/hotfix/emergency/rollback"    |
 | `,gbranches`          | branches sorted by most recent commit                    |
 | `,gactivity`          | commits grouped by month                                 |
-| `,setup-scala`        | install/update the Scala toolchain inside the VM         |
 | `,sync-jfrog-to-vm`   | copy JFrog OIDC creds from host into the VM              |
 | `,cheatsheet`         | display the terminal-tool keybinding reference           |
 | `,task-popup`         | taskwarrior popup (if enabled)                           |
@@ -227,35 +225,33 @@ Always installed: `starship`, optional `opencode`, optional `taskwarrior` +
 `taskwarrior-tui`.
 
 On development machines (`develop=true`) the list expands to: `neovim`
-(stable), `bun`, `go`, `ruby`, `node` (LTS), `rust` (stable), `java` plus IDE tools (`yazi`,
-`lazygit`, `zellij`, `delta`, `golangci-lint`, `prettier`, `emmet-ls`,
-`scooter`, `shfmt`, `yq`), language servers (`gopls`, `gofumpt`, `dlv`,
-`ruby-lsp`, `rufo`, `yaml-language-server`, `bash-language-server`,
-`vscode-langservers-extracted`, `dockerfile-language-server`,
-`compose-language-service`), plus `scalafmt` and a custom `coursier` binary.
+(stable), `bun`, `go`, `ruby`, `node` (LTS), `rust` (stable), plus IDE tools
+(`yazi`, `lazygit`, `zellij`, `delta`, `golangci-lint`, `prettier`,
+`emmet-ls`, `scooter`, `shfmt`, `yq`), and language servers (`gopls`,
+`gofumpt`, `dlv`, `ruby-lsp`, `rufo`, `yaml-language-server`,
+`bash-language-server`, `vscode-langservers-extracted`,
+`dockerfile-language-server`, `compose-language-service`).
 
 To add/remove: edit the tool list in the template. To pin versions, use
 mise's `version = "x.y.z"` syntax.
 
-### Scala / JFrog work flow
+### JFrog credentials sync
 
-Work-specific; entirely conditional on `work_username`.
+Work-specific; only meaningful on machines with `work_username` set.
 
 1. Credentials live in 1Password on the host; `,jfrog_oidc_env` exports
    `JFROG_OIDC_USER` / `JFROG_OIDC_TOKEN`.
 2. `,sync-jfrog-to-vm --host <jfrog-host>` (driven by
-   `bootstrap/vm/sync-jfrog.sh`) writes three files inside the VM:
-   - `~/.config/home-sweet-home/jfrog-oidc.env`
-   - `~/.ivy2/.credentials`
-   - `~/.config/coursier/credentials.properties`
-3. `,setup-scala` (script `bootstrap/vm/setup-scala.sh`) mise-installs the
-   toolchain and then `cs install sbt metals`.
-4. `SBT_CREDENTIALS` / `COURSIER_CREDENTIALS` are exported automatically by
-   `dot_config/zsh/rc.d/20_jfrog.tmpl` when those files exist.
+   `bootstrap/vm/sync-jfrog.sh`) writes `~/.config/home-sweet-home/jfrog-oidc.env`
+   inside the VM with the env vars plus a `BUNDLE_<host>` variable for
+   Bundler (Ruby gems hosted on private JFrog repos).
+3. `dot_config/zsh/rc.d/20_jfrog.tmpl` sources that file on every VM shell,
+   so Bundler/CLI tools see the credentials automatically.
 
-If you don't use JFrog, delete the three scripts, `20_jfrog.tmpl`, and the
-Scala-related mise entries. If you use a different private repo, the flow is
-a good template — keep the shape, swap the URL/realm logic.
+If you don't use JFrog, delete `bootstrap/vm/sync-jfrog.sh`,
+`,sync-jfrog-to-vm`, and `20_jfrog.tmpl`. If you use a different private
+repo, the flow is a reasonable template — keep the shape, swap the URL and
+credential sources.
 
 ## OpenCode (optional)
 
@@ -317,7 +313,6 @@ Add a personal Brewfile by creating `Brewfile.personal` and updating the
 
 `bootstrap/vm/`:
 - `macos-create-ubuntu.sh` — `limactl start` driven by `lima/dev-ubuntu.yaml`
-- `setup-scala.sh` — mise trust/install + `cs install sbt metals`
 - `sync-jfrog.sh` — JFrog creds into the VM
 
 chezmoi run hooks (in `chezmoi/.chezmoiscripts/`):
@@ -338,7 +333,7 @@ chezmoi run hooks (in `chezmoi/.chezmoiscripts/`):
 | Zellij + layouts               | Keep or swap for tmux (you'd rewrite `,zlayout`, `,zdev`, `,zagent`) |
 | OpenCode as AI agent           | Fully opt-in                                    |
 | Taskwarrior                    | Fully opt-in                                    |
-| JFrog + Scala work flow        | Work-specific; drop if not needed               |
+| JFrog credentials sync         | Work-specific; drop if not needed               |
 | VM `~/code` repo layout        | Change in `,ghclone` if you want a flat layout  |
 | No VM mounts                   | Add `mounts:` in `dev-ubuntu.yaml` if you want shared code with the host |
 | zsh only                       | Swap means rewriting every file in `dot_config/zsh/rc.d/` |
