@@ -1,4 +1,5 @@
 tap "hashicorp/tap"
+tap "xwmx/taps"
 
 brew "ansible"
 brew "bat"
@@ -55,6 +56,7 @@ brew "wget"
 brew "worktrunk"
 brew "zoxide"
 brew "hashicorp/tap/terraform"
+brew "xwmx/taps/nb"
 
 cask "1password-cli"
 cask "nikitabobko/tap/aerospace"
