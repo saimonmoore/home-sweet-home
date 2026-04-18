@@ -8,13 +8,13 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 
 for brewfile in \
-	{{ joinPath .chezmoi.sourceDir ".." "bootstrap" "host" "Brewfile.personal" | quote }} \
-	{{ joinPath .chezmoi.sourceDir "bootstrap" "host" "Brewfile.personal" | quote }}; do
+	{{ joinPath .chezmoi.sourceDir ".." "bootstrap" "host" "Brewfile" | quote }} \
+	{{ joinPath .chezmoi.sourceDir "bootstrap" "host" "Brewfile" | quote }}; do
 	if [[ -f "$brewfile" ]]; then
 		exec brew bundle --file "$brewfile"
 	fi
 done
 
-echo "Error: could not locate bootstrap/host/Brewfile.personal from chezmoi source path {{ .chezmoi.sourceDir }}." >&2
+echo "Error: could not locate bootstrap/host/Brewfile from chezmoi source path {{ .chezmoi.sourceDir }}." >&2
 exit 1
 {{- end }}
