@@ -44,7 +44,6 @@ brew "rsync"
 brew "telnet"
 brew "terragrunt"
 brew "tf-summarize"
-brew "tfenv", link: false
 brew "tfsec"
 brew "tig"
 brew "tmux"
