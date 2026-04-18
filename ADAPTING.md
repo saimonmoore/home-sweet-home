@@ -295,7 +295,7 @@ Catppuccin Mocha Black theme. Custom urgency coefficients bias `+bug`,
 
 ## macOS host specifics
 
-- Brewfile: `bootstrap/host/Brewfile.work`. Runs via
+- Brewfile: `bootstrap/host/Brewfile.personal`. Runs via
   `run_once_after_host-brew-bundle.sh.tmpl` only when
   `develop=false AND darwin AND work_username`.
 - Terminal emulator: Ghostty (brew cask). WezTerm config is present but
@@ -309,7 +309,7 @@ Add a personal Brewfile by creating `Brewfile.personal` and updating the
 ## Bootstrap scripts
 
 `bootstrap/host/`:
-- `Brewfile.work` — brew bundle manifest
+- `Brewfile.personal` — brew bundle manifest
 
 `bootstrap/vm/`:
 - `macos-create-ubuntu.sh` — `limactl start` driven by `lima/dev-ubuntu.yaml`
@@ -346,7 +346,7 @@ chezmoi run hooks (in `chezmoi/.chezmoiscripts/`):
    everything downstream has stable variables.
 3. Update `chezmoi/.chezmoiignore.tmpl` to match any new host/VM split.
 4. Edit `lima/dev-ubuntu.yaml` for your resources/distro.
-5. Trim/extend `bootstrap/host/Brewfile.work` and the mise config.
+5. Trim/extend `bootstrap/host/Brewfile.personal` and the mise config.
 6. Rename `,`-prefixed commands (or don't).
 7. Replace the color scheme (or don't).
 8. Swap the editor (big surgery — do last).

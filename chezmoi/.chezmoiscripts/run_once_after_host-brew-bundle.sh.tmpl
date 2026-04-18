@@ -1,4 +1,4 @@
-{{- if and (eq .chezmoi.os "darwin") (ne .work_username "") (not .develop) -}}
+{{- if and (eq .chezmoi.os "darwin") (not .develop) -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -8,13 +8,13 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 
 for brewfile in \
-	{{ joinPath .chezmoi.sourceDir ".." "bootstrap" "host" "Brewfile.work" | quote }} \
-	{{ joinPath .chezmoi.sourceDir "bootstrap" "host" "Brewfile.work" | quote }}; do
+	{{ joinPath .chezmoi.sourceDir ".." "bootstrap" "host" "Brewfile.personal" | quote }} \
+	{{ joinPath .chezmoi.sourceDir "bootstrap" "host" "Brewfile.personal" | quote }}; do
 	if [[ -f "$brewfile" ]]; then
 		exec brew bundle --file "$brewfile"
 	fi
 done
 
-echo "Error: could not locate bootstrap/host/Brewfile.work from chezmoi source path {{ .chezmoi.sourceDir }}." >&2
+echo "Error: could not locate bootstrap/host/Brewfile.personal from chezmoi source path {{ .chezmoi.sourceDir }}." >&2
 exit 1
 {{- end }}
