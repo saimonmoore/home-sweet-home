@@ -33,15 +33,14 @@ variables used throughout the repo. See `chezmoi/.chezmoi.toml.tmpl`.
 | Prompt                       | Variable                   | Effect                                                    |
 |------------------------------|----------------------------|-----------------------------------------------------------|
 | Will you develop on this machine? | `develop`             | Gates the full VM/editor toolchain (Neovim, Zellij, mise tools) |
-| Will you need opencode?      | `needs_opencode`           | Installs opencode via mise, adds opencode zsh rc + config |
 | Git author name / email      | `name`, `email`            | Written into `dot_gitconfig.tmpl`                         |
 | GitHub username              | `github_username`          | `[github] user =` and `,ghclone` target layout            |
 
 Taskwarrior is also conditional (`needs_taskwarrior`) — check the template
 for the exact prompt set.
 
-**Host answers:** `develop=no`, `needs_opencode=no`.
-**VM answers:** `develop=yes`, opencode as you prefer, same identity.
+**Host answers:** `develop=no`.
+**VM answers:** `develop=yes`, same identity.
 
 **To adapt:** edit `chezmoi/.chezmoi.toml.tmpl` to rename/remove prompts, then
 update every `.tmpl` file that branches on the removed variable. The easiest
@@ -57,7 +56,6 @@ which files land where:
   `,sync-jfrog-to-vm`, most editor/IDE tools.
 - VM-only skips `.ssh/config`, `.npmrc`, `.yarnrc*`, the `Library/` folder,
   the `05_homebrew` zsh rc.
-- `needs_opencode=false` removes `dot_config/opencode/`.
 - `needs_taskwarrior=false` removes `dot_taskrc*` and `,task-popup`.
 
 If you want a different split (e.g., Neovim on the host too), flip the
@@ -266,24 +264,61 @@ Re-runs are no-ops once the notebook is present.
 If you don't use `nb`, delete the Brewfile line, the bootstrap script,
 and `chezmoi/dot_nbrc`.
 
-## OpenCode (optional)
+## AI coding harnesses
 
-Gated by `needs_opencode`. Config: `chezmoi/dot_config/opencode/opencode.json.tmpl`.
+Both `opencode` and `claude` (Claude Code) are installed
+unconditionally — `opencode` via Homebrew on the host and mise in the
+VM; `claude` via the `claude-code` cask on the host and
+`npm:@anthropic-ai/claude-code` via mise in the VM.
 
-Permissions are opinionated:
-- `edit: allow` globally
-- `bash: allow` with explicit denies for `rm -rf*`, `git push --force*`,
-  `git reset --hard*`, `npm/pnpm/yarn publish*`
-- A separate `plan` agent is read-only (bash restricted to status/log/show,
-  grep, rg, cat, ls, tree, find, wc)
+A chezmoi-managed shim (`chezmoi/dot_local/bin/executable_,agent`)
+reads a selection from `~/.config/home-sweet-home/agent` (set with
+`,agent-select`) and exec's the chosen binary. The `dev-agentic`
+zellij layout runs `,agent` in its right pane, so `,zagent` always
+opens whichever harness is currently selected. See README "AI coding
+harnesses" for the switching UX and how to add new harnesses.
 
-Commands and skills live under `dot_config/opencode/commands/` and
-`dot_config/opencode/skills/` (debug, improve, prototype, check, review,
-test, pair-debugging, git-commit, software-design, ddd, fix-defect).
+`chezmoi/dot_config/opencode/opencode.json.tmpl` stays chezmoi-managed
+for opencode's own config (model, auth, permissions). The previously
+shipped `AGENTS.md`, `commands/`, and `skills/` directories under
+`dot_config/opencode/` were removed; skills now live centrally in
+`~/.agent/skills/` and are managed by openskills (see below).
 
 **VM browser-auth gotcha** is documented in the README: finish the browser
 login on the host, copy the failing `http://localhost:…` URL, `curl` it from
 inside the VM to complete the OAuth callback.
+
+## Agent skills (`openskills`)
+
+`~/.agent/skills/` is the single source of truth for skills available
+to every harness. [openskills](https://github.com/numman-ali/openskills)
+installs skills there (`--universal` mode) and writes an origin
+`.openskills.json` alongside each skill.
+
+This repo commits the shape, not the content:
+
+- `chezmoi/dot_agent/openskills-manifest.txt` — plain list of skill
+  names this machine should have.
+- `chezmoi/dot_agent/skills/<name>/create_dot_openskills.json` — the
+  origin metadata. `create_` prefix so chezmoi drops it once and
+  openskills can then refresh it without producing apply drift.
+
+The `run_after_agent-skills-bootstrap.sh.tmpl` hook reconciles disk
+state against the manifest on every apply: installs each unique
+source, prunes dirs whose names aren't in the manifest, and
+regenerates `~/.agent/AGENTS.md` via `openskills sync`. `npx` + `jq`
+are the runtime requirements — both come in via the Brewfile on the
+host and mise in the VM.
+
+To add a skill:
+
+1. `npx openskills install <source> --universal`
+2. `chezmoi add ~/.agent/skills/<name>/.openskills.json`
+3. Add the skill name to `chezmoi/dot_agent/openskills-manifest.txt`
+4. Commit.
+
+To remove a skill: drop its line from the manifest and `chezmoi rm`
+its `.openskills.json` file. The hook prunes on next apply.
 
 ## Git
 

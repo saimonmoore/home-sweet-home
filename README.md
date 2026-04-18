@@ -129,6 +129,77 @@ basics are all covered on the Desktop README.
 
 ---
 
+## AI coding harnesses
+
+The `,zagent` zellij layout opens a `,agent` pane, which routes to
+whichever AI coding harness is currently selected. Switch at any time
+with `,agent-select`.
+
+### Installed harnesses (personal fork)
+
+- **opencode** — installed unconditionally, both on the host via the
+  Brewfile (`brew "opencode"`) and inside the dev VM via mise
+  (`opencode = "latest"`).
+- **claude** (Claude Code) — installed on the host via
+  `cask "claude-code"` and in the VM via mise
+  (`"npm:@anthropic-ai/claude-code" = "latest"`).
+
+Both are always available. The shim just decides which one launches
+when you invoke `,agent`.
+
+### Switching
+
+```bash
+,agent-select              # show the current selection + availability of each
+,agent-select claude       # persist a selection (sticks across shells)
+,agent-select --clear      # drop the persistent selection; ,agent falls back to opencode
+```
+
+One-shot override without persisting:
+
+```bash
+AGENT_HARNESS=claude ,agent
+```
+
+`,zagent` always honours whatever `,agent-select` currently says.
+
+### Adding a new harness
+
+1. **Install its CLI.** Add a line to `bootstrap/host/Brewfile`
+   (macOS host) and/or `chezmoi/dot_config/mise/config.toml.tmpl`
+   (dev VM) — e.g. `"npm:@some-org/foo-agent" = "latest"`.
+2. **Register the binary name.** Append it to `KNOWN_HARNESSES`
+   near the top of `chezmoi/dot_local/bin/executable_,agent-select`.
+3. `chezmoi apply`.
+
+### Skills (`openskills`)
+
+Agent skills live centrally in `~/.agent/skills/` and are managed by
+[openskills](https://github.com/numman-ali/openskills). This repo
+commits:
+
+- `chezmoi/dot_agent/openskills-manifest.txt` — the list of skill
+  names this machine should have.
+- `chezmoi/dot_agent/skills/<name>/.openskills.json` — the origin
+  metadata openskills needs to fetch each skill.
+
+After every `chezmoi apply`, the
+`run_after_agent-skills-bootstrap.sh.tmpl` hook reconciles disk state
+against the manifest:
+
+1. reads the unique `source` values from the committed
+   `.openskills.json` files,
+2. runs `npx openskills install <source> --universal` for each,
+3. prunes any skill dir on disk whose name is not in the manifest,
+4. regenerates `~/.agent/AGENTS.md` via `npx openskills sync`.
+
+Run it manually with `chezmoi apply` or just `npx openskills install
+<source> --universal` for ad-hoc additions — then `chezmoi add
+~/.agent/skills/<name>/.openskills.json` and update the manifest to
+persist the change.
+
+---
+
 ## Manual chezmoi init (without the one-liner)
 
 ```bash

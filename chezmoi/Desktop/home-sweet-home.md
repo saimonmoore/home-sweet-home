@@ -16,6 +16,8 @@ kept on the Desktop as a one-click reference.
 ,chezmoi-init     re-apply the current machine's chezmoi state
 ,chezmoi-update   pull the latest home-sweet-home and apply
 ,verify           re-run the health check from the installer
+,agent            launch the currently selected AI coding harness
+,agent-select     switch between opencode / claude (show + pick)
 ```
 
 ---
