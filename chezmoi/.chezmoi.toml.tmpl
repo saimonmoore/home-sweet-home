@@ -1,5 +1,8 @@
-{{- $developAnswer := promptStringOnce . "develop" "Will you develop on this machine" | trim | lower -}}
-{{- $needsTaskwarriorAnswer := promptStringOnce . "needs_taskwarrior" "Should Taskwarrior be installed on this machine" | trim | lower -}}
+{{- /* develop=yes means this is the Linux dev VM. On macOS hosts always answer no. */ -}}
+{{- $developDefault := "no" -}}
+{{- if ne .chezmoi.os "darwin" -}}{{- $developDefault = "yes" -}}{{- end -}}
+{{- $developAnswer := promptStringOnce . "develop" "Is this the Linux dev VM? (macOS host: no, Ubuntu VM: yes)" $developDefault | trim | lower -}}
+{{- $needsTaskwarriorAnswer := promptStringOnce . "needs_taskwarrior" "Should Taskwarrior be installed on this machine" "no" | trim | lower -}}
 {{- $develop := or (eq $developAnswer "y") (eq $developAnswer "yes") (eq $developAnswer "true") (eq $developAnswer "1") -}}
 {{- $needsTaskwarrior := or (eq $needsTaskwarriorAnswer "y") (eq $needsTaskwarriorAnswer "yes") (eq $needsTaskwarriorAnswer "true") (eq $needsTaskwarriorAnswer "1") -}}
 [data]

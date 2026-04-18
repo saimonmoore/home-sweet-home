@@ -32,7 +32,7 @@ variables used throughout the repo. See `chezmoi/.chezmoi.toml.tmpl`.
 
 | Prompt                       | Variable                   | Effect                                                    |
 |------------------------------|----------------------------|-----------------------------------------------------------|
-| Will you develop on this machine? | `develop`             | Gates the full VM/editor toolchain (Neovim, Zellij, mise tools) |
+| Is this the Linux dev VM?    | `develop`                  | Gates the full VM/editor toolchain (Neovim, Zellij, mise tools). macOS host: `no`; Ubuntu dev VM: `yes`. |
 | Git author name / email      | `name`, `email`            | Written into `dot_gitconfig.tmpl`                         |
 | GitHub username              | `github_username`          | `[github] user =` and `,ghclone` target layout            |
 
