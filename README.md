@@ -3,24 +3,44 @@
 Dotfiles for my host plus an isolated Ubuntu VM for development.
 
 
-## First-Time Setup
+## Quick install (macOS host)
 
-### Work
-
-#### Host
-
-Install Homebrew first. `chezmoi` will run `brew bundle` once on the macOS host.
+On a fresh Mac, one command bootstraps Homebrew, chezmoi, and this
+repo's dotfiles:
 
 ```bash
-chezmoi init --apply saimon-moore/home-sweet-home
-,create-vm
+bash <(curl -fsSL https://raw.githubusercontent.com/saimon-moore/home-sweet-home/main/bootstrap/host/install.sh)
 ```
 
-When `chezmoi` prompts on the host, answer:
+The installer is idempotent, so it is safe to re-run.
+
+When `chezmoi` prompts, answer:
 
 - `Will you develop on this machine?` -> `no`
 - `Will you need opencode on this machine?` -> `no`
 - fill in `Git author name`, `Git author email`, `GitHub username`, and `Work username`
+
+When it finishes, open a new terminal and run `,create-vm` to create the
+dev VM, then follow the VM setup below. The installer also prints these
+next steps at the end.
+
+
+## First-Time Setup
+
+### Work
+
+#### Host (manual alternative)
+
+If you prefer to do it by hand rather than use the one-liner above:
+
+```bash
+# Install Homebrew (https://brew.sh), then:
+brew install chezmoi
+chezmoi init --apply saimon-moore/home-sweet-home
+,create-vm
+```
+
+Answer the chezmoi prompts as listed under Quick install above.
 
 #### VM as `dev`
 
