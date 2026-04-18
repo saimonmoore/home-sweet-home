@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Route to the currently selected AI coding harness.
+#
+# Precedence:
+#   1. $AGENT_HARNESS env var        (one-shot override)
+#   2. state file below              (persistent, set via ,agent-select)
+#   3. default harness               (hard-coded fallback)
+#
+# State file: ~/.config/home-sweet-home/agent
+# Known harnesses for this machine: edit ,agent-select to add/remove.
+
+set -euo pipefail
+
+STATE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/home-sweet-home/agent"
+DEFAULT_HARNESS="opencode"
+
+harness="${AGENT_HARNESS:-}"
+if [[ -z "$harness" && -r "$STATE_FILE" ]]; then
+	harness=$(tr -d '[:space:]' < "$STATE_FILE")
+fi
+if [[ -z "$harness" ]]; then
+	harness="$DEFAULT_HARNESS"
+fi
+
+if ! command -v "$harness" >/dev/null 2>&1; then
+	echo "Error: agent harness '$harness' is not on PATH." >&2
+	echo "Run ',agent-select' to see installed options, or install the CLI." >&2
+	exit 127
+fi
+exec "$harness" "$@"

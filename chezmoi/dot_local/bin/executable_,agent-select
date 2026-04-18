@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Manage which AI coding harness ,agent launches.
+#
+# Usage:
+#   ,agent-select              show current + list of known harnesses
+#   ,agent-select <name>       persist a selection
+#   ,agent-select --current    print current harness name only
+#   ,agent-select --list       print known harnesses (one per line)
+#   ,agent-select --clear      drop the persistent selection
+#
+# To add a harness:
+#   1. Install its CLI (Brewfile on host and/or mise config in the VM).
+#   2. Append its binary name to KNOWN_HARNESSES below.
+#   3. chezmoi apply.
+
+set -euo pipefail
+
+# Harnesses this machine knows about (personal fork).
+KNOWN_HARNESSES=( opencode claude )
+
+STATE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/home-sweet-home/agent"
+
+read_current() {
+	[[ -r "$STATE_FILE" ]] && tr -d '[:space:]' < "$STATE_FILE"
+}
+
+case "${1:-}" in
+	""|--show)
+		current=$(read_current || true)
+		if [[ -n "$current" ]]; then
+			echo "Current: $current"
+		else
+			echo "Current: (unset — ,agent falls back to ${KNOWN_HARNESSES[0]})"
+		fi
+		echo "Known:"
+		for h in "${KNOWN_HARNESSES[@]}"; do
+			if command -v "$h" >/dev/null 2>&1; then
+				printf '  \033[32m✓\033[0m %s\n' "$h"
+			else
+				printf '  \033[31m✗\033[0m %s (not installed)\n' "$h"
+			fi
+		done
+		;;
+	--current)
+		current=$(read_current || true)
+		echo "${current:-${KNOWN_HARNESSES[0]}}"
+		;;
+	--list)
+		printf '%s\n' "${KNOWN_HARNESSES[@]}"
+		;;
+	--clear)
+		rm -f "$STATE_FILE"
+		echo "Cleared persistent selection."
+		;;
+	-h|--help)
+		sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
+		;;
+	*)
+		chosen="$1"
+		for h in "${KNOWN_HARNESSES[@]}"; do
+			if [[ "$chosen" == "$h" ]]; then
+				mkdir -p "$(dirname "$STATE_FILE")"
+				printf '%s\n' "$chosen" > "$STATE_FILE"
+				echo "Set agent harness to: $chosen"
+				if ! command -v "$chosen" >/dev/null 2>&1; then
+					echo "Note: '$chosen' is not on PATH yet. Install it and try ,agent." >&2
+				fi
+				exit 0
+			fi
+		done
+		echo "Error: '$chosen' is not in the known list: ${KNOWN_HARNESSES[*]}" >&2
+		echo "Edit ${0} to add it." >&2
+		exit 2
+		;;
+esac

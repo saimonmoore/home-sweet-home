@@ -1,12 +1,9 @@
 {{- $developAnswer := promptStringOnce . "develop" "Will you develop on this machine" | trim | lower -}}
-{{- $needsOpencodeAnswer := promptStringOnce . "needs_opencode" "Will you need opencode on this machine" | trim | lower -}}
 {{- $needsTaskwarriorAnswer := promptStringOnce . "needs_taskwarrior" "Should Taskwarrior be installed on this machine" | trim | lower -}}
 {{- $develop := or (eq $developAnswer "y") (eq $developAnswer "yes") (eq $developAnswer "true") (eq $developAnswer "1") -}}
-{{- $needsOpencode := or (eq $needsOpencodeAnswer "y") (eq $needsOpencodeAnswer "yes") (eq $needsOpencodeAnswer "true") (eq $needsOpencodeAnswer "1") -}}
 {{- $needsTaskwarrior := or (eq $needsTaskwarriorAnswer "y") (eq $needsTaskwarriorAnswer "yes") (eq $needsTaskwarriorAnswer "true") (eq $needsTaskwarriorAnswer "1") -}}
 [data]
 develop = {{ $develop }}
-needs_opencode = {{ $needsOpencode }}
 needs_taskwarrior = {{ $needsTaskwarrior }}
 name = {{ promptStringOnce . "name" "Git author name" | quote }}
 email = {{ promptStringOnce . "email" "Git author email" | quote }}

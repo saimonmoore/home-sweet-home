@@ -29,11 +29,6 @@ Desktop/**
 Library/Application Support/lazygit/config.yml
 {{- end }}
 
-{{- if not .needs_opencode }}
-.config/opencode
-.config/opencode/**
-{{- end }}
-
 {{- if not $needsTaskwarrior }}
 .taskrc
 .taskrc.d
