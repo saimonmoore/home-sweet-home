@@ -1,0 +1,33 @@
+{{- if and (eq .chezmoi.os "darwin") (not .develop) -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+notebook_name="home"
+notebook_remote="git@github.com:saimonmoore/nb.git"
+nb_root="${NB_DIR:-$HOME/.nb}"
+notebook_dir="$nb_root/$notebook_name"
+
+if ! command -v nb >/dev/null 2>&1; then
+	echo "Error: nb is not installed. Expected the host brew bundle to have installed xwmx/taps/nb." >&2
+	exit 1
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+	echo "Error: git is required to bootstrap nb notebooks." >&2
+	exit 1
+fi
+
+mkdir -p "$nb_root"
+
+if [[ -d "$notebook_dir/.git" ]]; then
+	exit 0
+fi
+
+if [[ -e "$notebook_dir" ]] && [[ -n "$(ls -A "$notebook_dir" 2>/dev/null)" ]]; then
+	echo "Error: $notebook_dir exists and is not empty; refusing to clone over it." >&2
+	exit 1
+fi
+
+echo "==> Cloning nb notebook '$notebook_name' from $notebook_remote"
+git clone "$notebook_remote" "$notebook_dir"
+{{- end }}

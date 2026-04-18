@@ -252,6 +252,20 @@ If you don't use JFrog, delete `bootstrap/vm/sync-jfrog.sh`,
 repo, the flow is a reasonable template — keep the shape, swap the URL and
 credential sources.
 
+### Notes (`nb`)
+
+`nb` (https://github.com/xwmx/nb) is the host-side notes CLI. Installed
+via `xwmx/taps/nb` in `bootstrap/host/Brewfile`, with `~/.nbrc` tracked
+as `chezmoi/dot_nbrc`.
+
+The `chezmoi/.chezmoiscripts/run_once_after_nb-notebooks-bootstrap.sh.tmpl`
+hook runs on macOS hosts (`develop=false`) and, if `~/.nb/home` is not
+already a git repo, clones `git@github.com:saimonmoore/nb.git` into it.
+Re-runs are no-ops once the notebook is present.
+
+If you don't use `nb`, delete the Brewfile line, the bootstrap script,
+and `chezmoi/dot_nbrc`.
+
 ## OpenCode (optional)
 
 Gated by `needs_opencode`. Config: `chezmoi/dot_config/opencode/opencode.json.tmpl`.
@@ -335,6 +349,7 @@ chezmoi run hooks (in `chezmoi/.chezmoiscripts/`):
 | OpenCode as AI agent           | Fully opt-in                                    |
 | Taskwarrior                    | Fully opt-in                                    |
 | JFrog credentials sync         | Optional; drop if you don't use a private artifact registry |
+| `nb` notes + notebook sync     | Optional; drop the Brewfile line, bootstrap script, and `dot_nbrc` |
 | VM `~/code` repo layout        | Change in `,ghclone` if you want a flat layout  |
 | No VM mounts                   | Add `mounts:` in `dev-ubuntu.yaml` if you want shared code with the host |
 | zsh only                       | Swap means rewriting every file in `dot_config/zsh/rc.d/` |
