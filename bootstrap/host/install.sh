@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 # One-shot bootstrap for a fresh macOS host.
 #
-# Installs Homebrew (if missing), installs chezmoi (needed to apply the
-# dotfiles — it is also listed in the Brewfile for later installs), then
-# runs `chezmoi init --apply saimonmoore/home-sweet-home`. After chezmoi
-# finishes, the post-apply hook on macOS hosts runs `brew bundle` against
-# bootstrap/host/Brewfile to install the rest of the host tooling.
+# Installs Homebrew (if missing), installs chezmoi, then either:
+#   - clones and applies saimonmoore/home-sweet-home via
+#     `chezmoi init --apply` on a fresh machine, or
+#   - pulls the latest source and re-applies via `chezmoi update` on a
+#     machine that already has the chezmoi source initialised.
+# After that, the post-apply hooks run `brew bundle` against the host
+# Brewfile, clone the nb notebook, and sync openskills skills.
 #
-# Re-running this script is safe: each step skips work that's already done.
+# Re-running this script is safe and picks up the latest home-sweet-home
+# from GitHub each time. If you ran it once and the shell that invoked it
+# has since exited (so PATH doesn't include Homebrew), the script detects
+# an existing /opt/homebrew or /usr/local brew install and sources
+# shellenv without reinstalling Homebrew.
 
 set -euo pipefail
 
@@ -18,18 +24,26 @@ if [[ "$(uname -s)" != "Darwin" ]]; then
 	err "this installer targets macOS. Inside the Ubuntu VM, see README.md for the manual chezmoi init flow."
 fi
 
-# --- Homebrew ---------------------------------------------------------------
-if ! command -v brew >/dev/null 2>&1; then
-	log "Installing Homebrew"
-	NONINTERACTIVE=1 /bin/bash -c \
-		"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
+source_brew_shellenv() {
 	if [[ -x /opt/homebrew/bin/brew ]]; then
 		eval "$(/opt/homebrew/bin/brew shellenv)"
 	elif [[ -x /usr/local/bin/brew ]]; then
 		eval "$(/usr/local/bin/brew shellenv)"
 	else
-		err "Homebrew install finished but 'brew' is not on PATH."
+		err "Homebrew expected but 'brew' is not on PATH and no /opt/homebrew or /usr/local install was found."
+	fi
+}
+
+# --- Homebrew ---------------------------------------------------------------
+if ! command -v brew >/dev/null 2>&1; then
+	if [[ -x /opt/homebrew/bin/brew ]] || [[ -x /usr/local/bin/brew ]]; then
+		log "Homebrew already installed; sourcing shellenv"
+		source_brew_shellenv
+	else
+		log "Installing Homebrew"
+		NONINTERACTIVE=1 /bin/bash -c \
+			"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+		source_brew_shellenv
 	fi
 else
 	log "Homebrew already installed"
@@ -44,8 +58,18 @@ else
 fi
 
 # --- Apply dotfiles ---------------------------------------------------------
-log "Running: chezmoi init --apply saimonmoore/home-sweet-home"
-chezmoi init --apply saimonmoore/home-sweet-home
+# On a fresh machine run `chezmoi init --apply` so the source gets cloned.
+# On an already-initialised machine run `chezmoi update` so we pull the
+# latest home-sweet-home from GitHub before applying — otherwise a re-run
+# would silently re-apply a stale local clone.
+chezmoi_source="$(chezmoi source-path 2>/dev/null || true)"
+if [[ -n "$chezmoi_source" && -d "$chezmoi_source/.git" ]]; then
+	log "chezmoi source already initialised at $chezmoi_source — running 'chezmoi update'"
+	chezmoi update
+else
+	log "Running: chezmoi init --apply saimonmoore/home-sweet-home"
+	chezmoi init --apply saimonmoore/home-sweet-home
+fi
 
 # --- Verify -----------------------------------------------------------------
 verify_cmd="$HOME/.local/bin/,verify"
