@@ -10,10 +10,59 @@
 {{- end }}
 
 [alias]
-	ci = commit
+	l = log
+	ld = log --oneline --decorate
+	sh = show
 	st = status
+	sts = status -sb
+	ci = commit -v
+	cif = commit -v --fixup HEAD
+	reba = rebase -i --autosquash
 	co = checkout
 	br = branch
+	df = diff
+	dfc = diff --cached
+	cp = cherry-pick
+	cur = rev-parse --abbrev-ref HEAD
+	unstage = reset HEAD
+	update = "!f() { git remote update && git pull --rebase --recurse-submodules; }; f"
+	last = rev-parse HEAD
+	mod = "!f() { git status | grep modified | awk '{print $3}' | head -n 5; }; f"
+	lol = log --pretty=oneline --abbrev-commit --graph --decorate
+	unstaged = ls-files --others --exclude-standard
+	added = diff --cached --name-only
+	today = log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative
+	ff = merge --ff-only
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+	sha = rev-parse HEAD
+	latestb = for-each-ref --sort=-committerdate refs/heads/
+	cichangelog = "!f() { git commit --allow-empty -m \"* $1\"; }; f"
+	back = checkout @{-1}
+	recent = !git for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads/ | grep -v develop | head -n 20
+	fixup = "!f() { git commit --fixup=$1; git rebase -i --autosquash $1~1; }; f"
+	fixit = "!f() { git commit --fixup=$1; GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash $1~1; }; f"
+	down-on-it = rebase origin/develop
+	wip = !git add --all . && git commit -m 'WIP'
+	pushf = push --force-with-lease
+	pam = !BRANCH=`git recent | fzf` && git checkout ${BRANCH}
+	pamadd = !FILES=`git status -s | awk '{ print $2 }' | fzf -x -m` && git add --all ${FILES}
+	pamfix = !HASH=`git log --pretty=oneline | head | fzf` && git fixit `echo ${HASH} | awk '{ print $1 }'`
+	pamshow = !HASH=`git log --pretty=oneline | head | fzf` && git show `echo ${HASH} | awk '{ print $1 }'`
+	pamlog = !HASH=`git log --pretty=oneline | head | fzf` && echo ${HASH} | awk '{ print $1 }' | xargs echo -n | pbcopy
+	pamrebase = !HASH=`git log --pretty=oneline | head -n 50 | fzf` && git rebase -i `echo ${HASH} | awk '{ print $1 }'`^
+	pamvim = !FILES=`git status -s | awk '{ print $2 }' | fzf -x -m` && nvim ${FILES}
+	pamgrep = !sh -c 'FILES=`git grep -l -A 0 -B 0 $1 $2 | fzf -x -m` && nvim `echo ${FILES} | cut -d":" -f1 | xargs`' -
+	pamvimlog = !HASH=`git log --pretty=oneline | head -n 50 | fzf` && HASHZ=`echo ${HASH} | awk '{ print $1 }'` && FILES=`git show --pretty='format:'  --name-only $HASHZ | fzf -x -m` && nvim ${FILES}
+	pamreset = !HASH=`git log --pretty=oneline | head -n 50 | fzf` && git reset --soft `echo ${HASH} | awk '{ print $1 }'`^
+
+[help]
+	autocorrect = 1
+
+[rebase]
+	autosquash = true
+
+[rerere]
+	enabled = true
 
 [push]
 	default = current
