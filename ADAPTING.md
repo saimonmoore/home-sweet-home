@@ -321,15 +321,6 @@ To trim or extend the host brew set, edit `bootstrap/host/Brewfile`
 directly. The `run_once_after_host-brew-bundle.sh.tmpl` hook runs
 `brew bundle` against that file on every macOS host apply.
 
-## Mac App Store apps (`mas`)
-
-`brew "mas"` installs the Mac App Store CLI; the Brewfile then lists
-`mas "Xcode"` and `mas "Numbers"` so they are pulled in alongside the
-casks. `mas` needs you to be signed into the App Store once per
-machine before the first `brew bundle` — if you aren't, those entries
-will error cleanly and the rest of the bundle still runs. Sign in,
-re-apply, done.
-
 ## Manual installs
 
 Apps that don't automate cleanly via Homebrew or `mas`. Install these
