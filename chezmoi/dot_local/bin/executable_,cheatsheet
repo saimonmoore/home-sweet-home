@@ -106,6 +106,7 @@ ZELLIJ
   PANE ACTIONS — LOCKED MODE (the daily driver)
     Alt-Left / Down / Up / Right    move focus
     Alt-h                           split pane down (horizontal split)
+    Alt-s                           new stacked pane
     Alt-x                           close focused pane
 
   PANE ACTIONS — NORMAL MODE (after Alt-a to unlock)
