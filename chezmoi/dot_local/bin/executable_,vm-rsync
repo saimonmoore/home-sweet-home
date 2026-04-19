@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Rsync between the macOS host and the lima dev VM.
+#
+# Paths prefixed with `vm:` refer to the VM; all other paths are host
+# paths. Every other argument is forwarded to rsync verbatim — the
+# only magic this wrapper does is materialise lima's ssh config into
+# a temp file and pass it to rsync via `-e "ssh -F <file>"`.
+#
+# Examples:
+#   ,vm-rsync -avz --progress ./src/ vm:~/dest/
+#   ,vm-rsync -avz --delete ./src/ vm:~/dest/
+#   ,vm-rsync --dry-run -avz ./src/ vm:~/dest/
+#   ,vm-rsync -avz vm:~/code/myproj/ ./myproj/
+#
+# When to reach for this vs `,vm-cp`:
+#   `,vm-cp` wraps `limactl copy` (scp under the hood) — fine for
+#     one-shot transfers of single files or a handful of files.
+#   `,vm-rsync` is for large trees, incremental syncs, or anything
+#     where you want rsync semantics (--dry-run, --delete, --exclude,
+#     resumability on partial transfers).
+
+set -euo pipefail
+
+if ! command -v limactl >/dev/null 2>&1; then
+	echo "Error: limactl is not on PATH. Install via the host Brewfile." >&2
+	exit 1
+fi
+
+if ! command -v rsync >/dev/null 2>&1; then
+	echo "Error: rsync is not on PATH." >&2
+	exit 1
+fi
+
+if [[ $# -lt 2 ]]; then
+	sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'
+	exit 2
+fi
+
+# Regenerate lima's ssh config per-invocation. The VM's port can change
+# when it's recreated, so caching is riskier than the few milliseconds
+# it saves.
+tmpconfig=$(mktemp)
+trap 'rm -f "$tmpconfig"' EXIT
+limactl show-ssh --format config dev > "$tmpconfig"
+
+# Rewrite `vm:` -> `lima-dev:` (the Host alias limactl writes). Callers
+# don't need to know the SSH host name.
+args=()
+for arg in "$@"; do
+	case "$arg" in
+		vm:*) args+=("lima-dev:${arg#vm:}") ;;
+		*)    args+=("$arg") ;;
+	esac
+done
+
+rsync -e "ssh -F $tmpconfig" "${args[@]}"

@@ -293,18 +293,28 @@ HOME-SWEET-HOME HELPERS
   ,create-vm           create the Ubuntu lima VM (first time only)
   ,vm-ip               print the dev VM's IPv4 address
   ,vm-open [PORT]      open http://<vm-ip>[:PORT] in the host browser
-  ,vm-cp <src> <dst>   copy files host <-> VM. Prefix VM paths with
-                       `vm:` — e.g. `,vm-cp ./file vm:~/file`,
-                       `,vm-cp -r vm:~/build ./build`.
+  ,vm-cp <src> <dst>   one-shot copy host <-> VM via limactl copy.
+                       Prefix VM paths with `vm:`. Good for single
+                       files / small groups.
+                         ,vm-cp ./file vm:~/file
+                         ,vm-cp -r vm:~/build ./build
+  ,vm-rsync <rsync-args> …    rsync to/from the VM via lima's SSH
+                       config. All flags forward to rsync verbatim.
+                         ,vm-rsync -avz --progress ./src/ vm:~/dest/
+                         ,vm-rsync -avz --delete ./src/ vm:~/dest/
+                         ,vm-rsync --dry-run -avz ./src vm:~/dest
+                       Use over ,vm-cp for big trees, incremental
+                       syncs, --delete, or any rsync flag.
   ,sync-jfrog-to-vm    (work only) copy JFrog creds into the VM
 
 HOST <-> VM INTEGRATION
   File transfer:
-    ,vm-cp <src> <dst>      one-shot copy (wraps `limactl copy`)
-    For large trees or incremental syncs:
-      rsync -avz -e 'limactl shell dev --' ./src/ dev@VM:/dest/
-    or open an explicit SSH session:
-      limactl show-ssh dev
+    ,vm-cp <src> <dst>         one-shot copy (wraps `limactl copy`)
+    ,vm-rsync <rsync-args> …   rsync via lima's ssh config; use this
+                               for large trees, incremental syncs, or
+                               anything needing rsync flags.
+    Escape hatch for ad-hoc SSH:
+      limactl show-ssh dev      (prints a usable ssh_config stanza)
 
   Port forwarding (lima vzNAT — no manual setup needed):
     VM binds to 127.0.0.1:PORT
