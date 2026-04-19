@@ -320,6 +320,32 @@ To add a skill:
 To remove a skill: drop its line from the manifest and `chezmoi rm`
 its `.openskills.json` file. The hook prunes on next apply.
 
+## Writing chezmoi hooks that need mise-managed tools
+
+chezmoi hooks run as bash subshells that inherit PATH from the shell
+that invoked `chezmoi apply`. Inside the dev VM, mise-managed tools
+(`npx`, `node`, `nvim`, `go`, `ruby`, `rust`, `prettier`, `yq`,
+`shfmt`, language servers) live under `~/.local/share/mise/installs/`
+and are only reachable via `~/.local/share/mise/shims/`, which mise
+puts on PATH **only when the shell has been activated** (via the
+managed zshrc). A pre-existing shell that ran `mise install` but
+wasn't restarted doesn't yet see those tools — and neither do
+chezmoi's hook subshells inheriting from it.
+
+If a new hook needs a mise-managed tool, make it self-sufficient by
+prepending the shims dir yourself near the top:
+
+```bash
+if [[ -d "$HOME/.local/share/mise/shims" ]]; then
+    export PATH="$HOME/.local/share/mise/shims:$PATH"
+fi
+```
+
+Shims work without activation — they're thin dispatchers. This is
+what `run_onchange_after_openskills-bootstrap.sh.tmpl` already does
+for `npx`. Hooks that only need system tools (`git`, `apt-get`,
+`brew`, `nb`, `jq`) don't need the snippet.
+
 ## Git
 
 `chezmoi/dot_gitconfig.tmpl` sets:

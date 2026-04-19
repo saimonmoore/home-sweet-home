@@ -36,6 +36,18 @@ if ! command -v jq >/dev/null 2>&1; then
 	exit 1
 fi
 
+# openskills uses node's cpSync to install skills over an existing target.
+# Node can't overwrite read-only files, so a previous install that copied
+# a source repo's .git directory (mode 444 pack files) blocks the next
+# install with EACCES. Drop any stray .git dirs and flip everything to
+# writable before the install loop — openskills will recreate whatever
+# it needs from a clean base.
+if [[ -d "$SKILLS_ROOT" ]]; then
+	chmod -R u+w "$SKILLS_ROOT" 2>/dev/null || true
+	find "$SKILLS_ROOT" -mindepth 2 -type d -name '.git' \
+		-exec rm -rf {} + 2>/dev/null || true
+fi
+
 if [[ ! -f "$MANIFEST" ]]; then
 	echo "No openskills manifest at $MANIFEST; skipping agent skills sync."
 	exit 0
