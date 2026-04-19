@@ -6,6 +6,12 @@ experimental = true
 install_before = "7d"
 ruby.compile = false
 
+# Honour single-tool "idiomatic" version files in project dirs: .nvmrc
+# (node), .python-version (python), .ruby-version (ruby), .go-version
+# (go). Without this opt-in, mise only reads .mise.toml / .tool-versions
+# and silently keeps the global version even when a repo ships .nvmrc.
+idiomatic_version_file_enable_tools = ["node", "python", "ruby", "go"]
+
 [tools]
 
 opencode = "latest"

@@ -285,6 +285,60 @@ OPENSKILLS (AGENT SKILLS)
   The run_onchange_after_openskills-bootstrap hook reconciles
   ~/.agent/skills with the manifest on every chezmoi apply.
 
+MISE (language/tool version manager)
+  Think of mise as asdf + nvm + pyenv + rbenv rolled into one. Global
+  defaults live in ~/.config/mise/config.toml (chezmoi-managed); per-
+  project overrides come from files in the repo.
+
+  WHAT MISE LOOKS AT (highest priority first)
+    1. .mise.toml / mise.toml in project root (or any parent)
+       [tools]
+       node = "20.19.5"
+       python = "3.12"
+    2. .tool-versions (asdf format, also in any parent)
+       node 20.19.5
+       python 3.12
+    3. .nvmrc / .python-version / .ruby-version / .go-version
+       (enabled here via idiomatic_version_file_enable_tools)
+    4. Global ~/.config/mise/config.toml
+
+  DAILY COMMANDS
+    mise ls                        list installed tool versions
+    mise ls --current              show what's active in this dir
+    mise current                   same, condensed
+    mise install                   install everything the config asks
+                                   for but that isn't yet installed
+    mise install node@20.19.5      install a specific version
+    mise use node@20.19.5          pin for this dir (writes mise.toml)
+    mise use -g node@lts           change the global default
+    mise outdated                  list versions with upgrades
+    mise upgrade                   upgrade every tool to latest allowed
+    mise exec -- <cmd>             run a cmd with mise-managed PATH
+    mise which node                show the actual binary path
+
+  TYPICAL FLOW FOR A REPO WITH .nvmrc
+    cd ~/code/github/acme/service
+    cat .nvmrc                     # e.g. v20.19.5
+    mise install                   # installs 20.19.5 (first time only)
+    # from now on, just cd in — mise auto-switches to 20.19.5, and
+    # reverts to the global version on cd out.
+
+  AUTO-SWITCHING
+    Managed via `eval "$(mise activate zsh)"` in chezmoi/dot_config/
+    zsh/rc.d/10_tools — fires on every new shell. On `cd`, mise walks
+    upward looking for any of the files above and updates PATH.
+
+  PINNING A NEW PROJECT
+    mise use node@20 python@3.12   writes .mise.toml into the current
+                                   directory. Commit that file so
+                                   teammates pick up the same versions.
+
+  NUKE-AND-START-OVER
+    mise uninstall node@24         remove a specific version
+    mise uninstall --all node      remove every node
+    mise trust                     allow project mise.toml to run
+                                   tasks/activations (safety prompt)
+
 HOME-SWEET-HOME HELPERS
   ,verify              host-side health check (installs / config / VM)
   ,chezmoi-init        re-apply the current machine's chezmoi state
