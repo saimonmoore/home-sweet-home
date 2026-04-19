@@ -27,7 +27,6 @@ if ! command -v starship >/dev/null 2>&1; then
 fi
 
 export COLORTERM=truecolor
-PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 export EDITOR=nvim
 export VISUAL=nvim
 
