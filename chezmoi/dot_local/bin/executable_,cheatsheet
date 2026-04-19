@@ -368,6 +368,33 @@ HOST <-> VM INTEGRATION
     Prefer binding dev servers to 127.0.0.1 inside the VM — it's the
     boring path that Just Works on the host browser/curl.
 
+  CLIPBOARD (VM -> macOS, via OSC 52)
+
+    Everything below ends up on the macOS clipboard — nvim yank, zellij
+    mouse-drag selection, anything piped into `osc52-copy`.
+
+    From nvim:
+      "+y                   yank selection to system clipboard
+      :set clipboard+=unnamedplus  (optional) make every y go to +
+      "+p                   paste system clipboard
+
+    From zellij:
+      mouse-drag a selection; on release, zellij runs `copy_command`
+      which shells out to `osc52-copy` -> macOS clipboard.
+
+    From any shell command:
+      echo "hello" | osc52-copy
+      pbcopy-like behavior, usable in pipelines.
+
+    How it works:
+      osc52-copy reads stdin, base64s it, and writes an OSC 52 escape
+      sequence to /dev/tty. WezTerm (host) sees the escape and writes
+      the payload to the macOS clipboard. zellij and lima both pass
+      OSC 52 through untouched.
+
+    Paste from macOS clipboard into TUI apps: normal Cmd-V works in
+    WezTerm and zellij; nvim's "+p reads back via OSC 52.
+
   PODMAN (inside the VM)
 
     podman run -p 3000:3000 image             # publishes on VM 0.0.0.0

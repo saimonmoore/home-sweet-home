@@ -9,6 +9,7 @@ simplified_ui true
 pane_frames false
 default_mode "locked"
 copy_on_select true
+copy_command {{ joinPath .chezmoi.homeDir ".local" "bin" "osc52-copy" | quote }}
 scrollback_editor "nvim"
 mouse_mode true
 show_startup_tips false

@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+# Read stdin and emit an OSC 52 escape sequence to the controlling
+# terminal so the enclosing terminal emulator (WezTerm on the macOS
+# host) writes the content to the system clipboard.
+#
+# Used as zellij's `copy_command` inside the lima dev VM, where
+# there's no xclip / wl-copy / pbcopy to forward selections to. Works
+# on the host too — WezTerm happily accepts OSC 52 regardless of
+# whether zellij is in the chain.
+
+set -eu
+
+# Limit to ~3 MB of base64 output; bigger is likely unintended and
+# terminals often reject huge OSC 52 payloads anyway.
+max_bytes=3000000
+
+data="$(head -c "$max_bytes" | base64 | tr -d '\n')"
+printf '\033]52;c;%s\007' "$data" > /dev/tty
