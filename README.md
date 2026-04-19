@@ -213,20 +213,37 @@ root has `.chezmoiroot` pointing at `chezmoi/`.
 
 ---
 
-## OpenCode browser auth in the VM
+## OAuth browser auth in the VM
 
-OpenCode's browser auth redirects back to `localhost` on the machine
-that started `opencode`. When it runs inside the VM, the final
-browser redirect therefore fails on the host. The working flow:
+Every OAuth-based harness (codex, opencode, claude-code) spins up a
+local HTTP listener on `127.0.0.1:<port>` and redirects the browser
+to it after login. When the harness runs in the VM, the host browser
+can't reach that listener, so the redirect lands on a connection
+error. **No port forwarding needed** — the callback URL's query
+string carries the token, so hitting the URL from inside the VM
+completes the flow.
 
-1. Run `/connect` inside `opencode` in the VM.
-2. Complete the browser login on the host.
-3. When the browser lands on the failing `http://localhost:...`
-   callback URL, copy that full URL.
-4. Back in the VM: `curl '<paste-the-final-localhost-url-here>'`.
+Recipe:
 
-That delivers the auth callback to the OpenCode process running
-inside the VM.
+1. Start login in the VM. Depending on harness:
+   - codex: `codex login` (or just run `codex` / `,agent` and follow
+     the prompt on first use).
+   - opencode: `/connect` inside an opencode session.
+   - claude-code: `/login` inside claude-code (or first run).
+
+   The harness prints an auth URL.
+2. Open the URL on the host Mac and complete sign-in.
+3. The browser redirects to `http://localhost:<port>/callback?...`
+   and shows a connection error. **Copy the full URL from the
+   address bar.**
+4. In any VM shell (a new zellij pane, `,dev` in another tab, etc.):
+
+   ```bash
+   curl '<paste-the-full-localhost-url-here>'
+   ```
+
+The harness's listener inside the VM receives the callback and
+finishes auth.
 
 ---
 

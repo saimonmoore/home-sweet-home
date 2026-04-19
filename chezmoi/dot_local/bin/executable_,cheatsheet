@@ -213,6 +213,28 @@ AI CODING HARNESSES
   Available harnesses depend on repo: work installs opencode + codex;
   personal installs opencode + claude. See README for how to add more.
 
+  OAUTH BROWSER AUTH IN THE VM
+    Every harness starts a local HTTP listener on 127.0.0.1:<port>
+    for its login callback. The host browser can't reach that port
+    in the VM, so the redirect lands on a connection error.
+    NO PORT FORWARDING NEEDED — the callback URL carries the token
+    in its query string, so hitting the URL from inside the VM
+    finishes the flow.
+
+      1. Start the harness's login in the VM:
+           codex       — codex login (or first run)
+           opencode    — /connect inside opencode
+           claude      — /login inside claude-code (or first run)
+         It prints an auth URL.
+      2. Open the URL on the host Mac; complete sign-in.
+      3. Browser lands on http://localhost:<port>/callback?...
+         with a connection error. Copy the FULL URL from the
+         address bar.
+      4. In any VM shell:
+           curl '<paste-the-full-url-here>'
+
+    The harness's listener receives the callback and finishes auth.
+
 SCOOTER
   Launch:
     scooter
