@@ -7,12 +7,11 @@ export PATH="$HOME/.local/share/mise/shims:$PATH"
 
 {{- if eq .chezmoi.os "linux" }}
 
-# In the Linux dev VM, route `docker compose` / `docker` calls through
-# podman's Docker-compatible API socket. Paired with real docker
-# compose v2 as the compose provider in ~/.config/containers/
-# containers.conf, this gives us full compose-spec support
-# (environment-sourced secrets, etc.) without running actual docker.
-# The podman user socket is enabled by the chezmoi
-# run_once_after_vm-podman-socket.sh hook.
-export DOCKER_HOST="unix://${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/podman/podman.sock"
+# In the Linux dev VM we run rootless Docker. The daemon's socket
+# lives under $XDG_RUNTIME_DIR (the user runtime dir), and is set up
+# by the chezmoi run_once_after_vm-docker-rootless.sh hook (which
+# runs `dockerd-rootless-setuptool.sh install`). Exporting DOCKER_HOST
+# lets `docker` / `docker compose` find the daemon without any extra
+# CLI flags.
+export DOCKER_HOST="unix://${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/docker.sock"
 {{- end }}

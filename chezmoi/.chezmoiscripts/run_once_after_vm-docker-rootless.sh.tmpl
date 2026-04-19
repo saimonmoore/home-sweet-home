@@ -1,0 +1,31 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Finish Docker rootless setup for the dev user. Requires
+# docker-ce-rootless-extras to be installed (done by
+# lima/dev-ubuntu-system.sh). The setup tool creates the per-user
+# systemd unit and socket at $XDG_RUNTIME_DIR/docker.sock — matching
+# DOCKER_HOST exported from ~/.zprofile.
+
+if ! command -v dockerd-rootless-setuptool.sh >/dev/null 2>&1; then
+	echo "Error: dockerd-rootless-setuptool.sh not found — is docker-ce-rootless-extras installed?" >&2
+	exit 1
+fi
+
+if ! command -v systemctl >/dev/null 2>&1 || [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
+	echo "No user systemd session available; skipping Docker rootless setup." >&2
+	echo "Run 'dockerd-rootless-setuptool.sh install' manually once logged in." >&2
+	exit 0
+fi
+
+# Idempotent: the tool prints 'already installed' and exits 0 if rerun.
+dockerd-rootless-setuptool.sh install
+
+systemctl --user enable --now docker
+
+echo "Docker rootless enabled at $XDG_RUNTIME_DIR/docker.sock"
+{{- else -}}
+#!/usr/bin/env bash
+exit 0
+{{- end }}

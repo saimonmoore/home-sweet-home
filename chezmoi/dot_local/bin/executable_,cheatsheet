@@ -371,98 +371,84 @@ MISE (language/tool version manager)
     mise trust                     allow project mise.toml to run
                                    tasks/activations (safety prompt)
 
-PODMAN (container runtime, inside the VM)
-  Podman is the docker replacement in the VM. Rootless by default,
-  daemonless, mostly drop-in for `docker` and `docker compose`.
+DOCKER (container runtime, inside the VM)
+  Docker Engine runs in rootless mode in the VM. The daemon lives
+  under the dev user's systemd session; its socket is at
+  $XDG_RUNTIME_DIR/docker.sock. BuildKit, docker buildx and
+  docker compose v2 are all shipped as Docker CLI plugins from the
+  official Docker apt repo — so every docker-compose-spec feature
+  (environment-sourced secrets, build secrets via
+  `RUN --mount=type=secret`, named profiles, depends_on conditions)
+  works identically to Docker on macOS.
 
-  THE COMMAND CHAIN
-    docker            -> /usr/bin/docker is a thin shim from the
-                         podman-docker apt package. Forwards every
-                         arg to `podman` verbatim.
-    docker compose    -> shim forwards to `podman compose`, which
-                         reads ~/.config/containers/containers.conf
-                         and calls the external compose provider.
-                         home-sweet-home installs REAL docker compose
-                         v2 (the Go binary, /usr/local/lib/docker/
-                         cli-plugins/docker-compose) and pins it as
-                         the primary provider. docker compose v2
-                         talks to podman via DOCKER_HOST (set in
-                         ~/.zprofile) pointing at the user's podman
-                         socket ($XDG_RUNTIME_DIR/podman/podman.sock,
-                         enabled by a chezmoi run_once hook).
-                         End result: the full docker-compose-spec —
-                         environment-sourced secrets, depends_on
-                         conditions, named profiles, etc. — works in
-                         the VM identically to real docker on macOS.
-    podman-compose    -> kept installed via pipx (latest) as a
-                         fallback provider, but rarely the one
-                         podman picks. `podman-compose` still runs
-                         directly if invoked by name.
-    DIAGNOSTICS       -> if a Makefile barfs on compose flags:
-                           podman compose version
-                         should print `Docker Compose version vX.Y.Z`
-                         (the Go binary). If it prints `podman-
-                         compose version N.M.L` (Python), the v2
-                         binary is missing or the user socket isn't
-                         running. Check:
-                           ls -l /usr/local/lib/docker/cli-plugins/
-                           systemctl --user status podman.socket
-                           echo $DOCKER_HOST
+  ENVIRONMENT
+    DOCKER_HOST is set in ~/.zprofile to
+      unix://$XDG_RUNTIME_DIR/docker.sock
+    So `docker` / `docker compose` find the daemon without flags.
 
-  DAILY COMMANDS (podman or docker — pick one, both work)
-    podman ps                       running containers
-    podman ps -a                    include stopped
-    podman images                   local images
-    podman pull alpine:3.20         fetch image
-    podman run --rm -it alpine sh   throwaway container
-    podman run -d -p 3000:3000 \
-      --name web myimage            detached, port-published
-    podman logs -f web              follow logs
-    podman exec -it web sh          shell inside running container
-    podman stop web && podman rm web
-    podman build -t myimage .       build from Dockerfile
-    podman compose up               compose v2 (preferred form)
-    podman compose down
+  SANITY CHECKS
+    docker version                      client + server must match
+    docker compose version              "Docker Compose version vX.Y.Z"
+    docker buildx version               "github.com/docker/buildx ..."
+    docker info | grep -i rootless      confirm rootless: true
+    systemctl --user status docker      running + enabled
+
+  DAILY COMMANDS
+    docker ps                           running containers
+    docker ps -a                        include stopped
+    docker images                       local images
+    docker pull alpine:3.20             fetch image
+    docker run --rm -it alpine sh       throwaway container
+    docker run -d -p 3000:3000 \
+      --name web myimage                detached, port-published
+    docker logs -f web                  follow logs
+    docker exec -it web sh              shell inside running container
+    docker stop web && docker rm web
+    docker build -t myimage .           build (BuildKit by default)
+    docker compose up                   compose v2
+    docker compose down
+    docker compose --profile dev build  named profile build
 
   REGISTRIES / AUTH
-    podman login ghcr.io            (also works for docker.io,
-                                     quay.io, your private registry)
-    Auth file: ~/.config/containers/auth.json
-    Default registries config: /etc/containers/registries.conf
+    docker login ghcr.io                also works for docker.io,
+                                        quay.io, private registries
+    Auth file: ~/.docker/config.json
 
   WHERE THINGS LIVE (rootless)
-    Images / layers / volumes:  ~/.local/share/containers/storage/
-    Run state (sockets, pids):  $XDG_RUNTIME_DIR/containers/
-    No system daemon — each `podman` invocation does its own thing.
+    Images / layers / volumes:  ~/.local/share/docker/
+    Run state / daemon socket:  $XDG_RUNTIME_DIR/docker.sock
+    User systemd unit:          ~/.config/systemd/user/docker.service
 
   CLEANUP
-    podman system df                disk usage
-    podman system prune             remove stopped containers,
-                                    dangling images, unused networks
-    podman system prune -a --volumes  nuke everything unused
-    podman rmi <image>              remove a specific image
-    podman volume prune             remove unused volumes
+    docker system df                    disk usage
+    docker system prune                 remove stopped containers,
+                                        dangling images, unused nets
+    docker system prune -a --volumes    nuke everything unused
+    docker rmi <image>                  remove specific image
+    docker volume prune                 unused volumes
 
   ROOTLESS GOTCHAS
-    Ports < 1024 require either CAP_NET_BIND_SERVICE on the binary
-      or a sysctl tweak — easier to just publish on a high port and
+    Ports < 1024 require either CAP_NET_BIND_SERVICE on the rootless
+      dockerd or a sysctl tweak — just publish on a high port and
       let lima vzNAT forward it.
-    User namespaces use subuid/subgid ranges (set up automatically
-      by the lima provisioning: 100000-165535 for `dev`).
-    `podman info` shows runtime details if something feels off.
+    User namespaces use subuid/subgid (set up by the lima bootstrap:
+      100000-165535 for `dev`).
+    If `docker version` reports "Cannot connect to the Docker
+      daemon", check `systemctl --user status docker`. If the service
+      is dead, `systemctl --user restart docker`.
+    loginctl enable-linger dev keeps the daemon up across SSH
+      disconnects — already done by the bootstrap.
 
   COMPOSE SPECIFICS
-    docker-compose.yml is read as-is; v3.x is fine. The `podman
-    compose` subcommand respects the COMPOSE_FILE env var and
-    project naming the same way docker does.
-    Build context, env_file, volumes, networks all just work.
-    Healthchecks: same syntax.
-    `depends_on: condition: service_healthy` works.
+    docker-compose.yml is read as-is; full compose-spec support.
+    Build secrets (`RUN --mount=type=secret,id=X` + compose-level
+      `secrets:`) Just Work — BuildKit is built into dockerd.
+    Healthchecks, depends_on conditions, profiles all work.
 
   PORT FORWARDING (VM -> host)
-    podman run -p 3000:3000 image             # publishes on VM
+    docker run -p 3000:3000 image             # publishes on VM
                                               # 0.0.0.0
-    podman run -p 127.0.0.1:3000:3000 image   # on VM localhost
+    docker run -p 127.0.0.1:3000:3000 image   # on VM localhost
                                               # -> host reaches at
                                               #    http://localhost:3000
                                               #    via lima vzNAT

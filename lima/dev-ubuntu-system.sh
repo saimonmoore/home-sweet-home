@@ -6,10 +6,9 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends \
 	ca-certificates curl git sudo zsh zsh-autosuggestions openssh-client \
-	podman podman-compose podman-docker uidmap \
+	uidmap dbus-user-session fuse-overlayfs slirp4netns iptables \
 	ripgrep fd-find bat eza zoxide fzf jq \
 	tar unzip gzip \
-	pipx \
 	build-essential
 
 # Ubuntu ships fd-find as `fdfind` and bat as `batcat`. The zsh config
@@ -29,6 +28,9 @@ if ! command -v helm >/dev/null 2>&1; then
 	curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 fi
 
+# subuid / subgid are required for Docker rootless (user namespace
+# remapping). 100000-165535 gives 65536 contiguous IDs, the standard
+# minimum.
 if ! grep -q '^dev:' /etc/subuid; then
 	usermod --add-subuids 100000-165535 dev
 fi
@@ -43,52 +45,38 @@ if ! command -v mise >/dev/null 2>&1; then
 	curl https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise sh
 fi
 
-# Upgrade podman-compose beyond Ubuntu 24.04's apt 1.0.6 (too old for
-# --profile and other docker-compose-v2 flags). pipx drops the latest
-# release in ~dev/.local/bin, which shadows /usr/bin/podman-compose on
-# the dev user's PATH (set in ~/.zprofile). Kept as a fallback for
-# anything invoking podman-compose directly; the primary compose
-# provider is real docker compose v2 (installed below).
-sudo -u dev -H bash -c '
-	set -eu
-	export PATH="$HOME/.local/bin:$PATH"
-	if pipx list --short 2>/dev/null | grep -q "^podman-compose "; then
-		pipx upgrade podman-compose || true
-	else
-		pipx install podman-compose
-	fi
-'
+# Install Docker Engine + CLI + Buildx + Compose v2 from Docker's
+# official apt repo. Rootless mode is completed per-user by the
+# chezmoi run_once hook (dockerd-rootless-setuptool.sh install),
+# which creates the user systemd unit and socket at
+# $XDG_RUNTIME_DIR/docker.sock (matching DOCKER_HOST in ~/.zprofile).
+if ! command -v docker >/dev/null 2>&1; then
+	install -m 0755 -d /etc/apt/keyrings
+	curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+		-o /etc/apt/keyrings/docker.asc
+	chmod a+r /etc/apt/keyrings/docker.asc
 
-# Install real docker compose v2 (Go binary). Wired in as podman's
-# external compose provider via ~/.config/containers/containers.conf.
-# It supports every docker-compose-spec feature (environment-sourced
-# secrets, named profiles, healthcheck conditions, etc.) and talks to
-# podman's user socket via DOCKER_HOST set in ~/.zprofile.
-DOCKER_COMPOSE_VERSION="v5.1.3"
-case "$(dpkg --print-architecture)" in
-amd64) COMPOSE_ARCH=x86_64 ;;
-arm64) COMPOSE_ARCH=aarch64 ;;
-*)
-	echo "unsupported architecture for docker compose v2: $(dpkg --print-architecture)" >&2
-	exit 1
-	;;
-esac
-install -d /usr/local/lib/docker/cli-plugins
-if [[ ! -x /usr/local/lib/docker/cli-plugins/docker-compose ]] \
-	|| ! /usr/local/lib/docker/cli-plugins/docker-compose version --short 2>/dev/null | grep -q "^${DOCKER_COMPOSE_VERSION#v}$"; then
-	# Download to a tmpfile first and `install` atomically into place.
-	# curl writing directly into /usr/local/lib has been observed to
-	# fail occasionally (network blip, fs-cache race) with "Failure
-	# writing output to destination"; staging via /tmp and then
-	# `install`ing the fully-downloaded file is resilient to it.
-	dc_tmp="$(mktemp -t docker-compose.XXXXXX)"
-	curl -fsSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${COMPOSE_ARCH}" \
-		-o "$dc_tmp"
-	install -m 0755 "$dc_tmp" /usr/local/lib/docker/cli-plugins/docker-compose
-	rm -f "$dc_tmp"
+	# shellcheck disable=SC1091
+	. /etc/os-release
+	echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $VERSION_CODENAME stable" \
+		>/etc/apt/sources.list.d/docker.list
+
+	apt-get update
+	apt-get install -y --no-install-recommends \
+		docker-ce \
+		docker-ce-cli \
+		containerd.io \
+		docker-buildx-plugin \
+		docker-compose-plugin \
+		docker-ce-rootless-extras
 fi
 
+# We use rootless Docker only. Disable the system-wide rootful dockerd
+# and its socket so they don't race with the per-user service set up by
+# dockerd-rootless-setuptool.sh.
+systemctl disable --now docker.service docker.socket 2>/dev/null || true
+
 # Let the dev user's systemd session persist across SSH disconnects so
-# podman.socket (which compose v2 talks to via DOCKER_HOST) stays up
-# even when no interactive shell is attached.
+# the rootless Docker service stays up even when no interactive shell
+# is attached.
 loginctl enable-linger dev
