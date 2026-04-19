@@ -14,11 +14,14 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 mkdir -p "$(dirname "$config_dir")"
-# Bypass any `url."git@github.com:".insteadOf = https://github.com/` rewrite
-# from the VM gitconfig so this bootstrap works on a brand-new VM before
-# the user has registered ~/.ssh/id_ed25519.pub with GitHub.
-git -c 'url.https://github.com/.insteadOf=' \
-    clone --depth 1 https://github.com/LazyVim/starter "$config_dir"
+# Isolate from whatever ~/.gitconfig / /etc/gitconfig may exist — in
+# particular, `url."git@github.com:".insteadOf = https://github.com/`
+# rewrites would force SSH auth before the user has registered their
+# key with GitHub. Also protects against our previous bug where a
+# `-c url.https://github.com/.insteadOf=` (empty value) caused git to
+# double-prepend "https://github.com/" to every URL it saw.
+GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+    git clone --depth 1 https://github.com/LazyVim/starter "$config_dir"
 rm -rf "$config_dir/.git"
 
 echo "LazyVim starter cloned into $config_dir."
