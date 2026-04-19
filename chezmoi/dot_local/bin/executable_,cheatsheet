@@ -86,9 +86,7 @@ ZELLIJ
     Option+<letter> is sent as Alt+<letter> to the terminal. Every
     `Alt-x` below is just `Option+x` on the Mac. No Shift required.
 
-  QUICK ACTIONS (work in both Locked and Normal)
-    Alt-h / Alt-j / Alt-k / Alt-l   move focus left/down/up/right
-    Alt-v                           split pane right
+  QUICK ACTIONS (both modes)
     Alt-t                           new tab
     Alt-m                           rename current tab
     Alt-p / Alt-n                   previous / next tab
@@ -97,12 +95,24 @@ ZELLIJ
     Alt-d                           detach session (see "Persistence")
     Alt-o                           toggle focused pane floating/embedded
     Alt-z                           zoom/unzoom focused pane
+    Alt-v                           split pane right
 
     Alt-f                           floating zsh (cwd-aware)
     Alt-g                           floating lazygit
     Alt-e                           floating yazi (cwd-aware)
     Alt-r                           floating scooter
     Alt-?                           floating this cheatsheet
+
+  PANE ACTIONS — LOCKED MODE (the daily driver)
+    Alt-Left / Down / Up / Right    move focus
+    Alt-h                           split pane down (horizontal split)
+    Alt-s                           new stacked pane
+    Alt-x                           close focused pane
+
+  PANE ACTIONS — NORMAL MODE (after Alt-a to unlock)
+    Alt-h / Alt-j / Alt-k           move focus left/down/up
+                                    (Alt-l is reserved for re-locking;
+                                     no move-focus-right outside Locked)
 
   NORMAL-MODE DEFAULTS (after Alt-a to unlock)
     Ctrl-p      Pane sub-mode  (n new, x close, d split-down,
