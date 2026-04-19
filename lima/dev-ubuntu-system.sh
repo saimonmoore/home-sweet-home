@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends \
 	ca-certificates curl git sudo zsh zsh-autosuggestions openssh-client \
-	podman podman-compose uidmap \
+	podman podman-compose podman-docker uidmap \
 	ripgrep fd-find bat eza zoxide fzf jq \
 	tar unzip gzip \
 	build-essential

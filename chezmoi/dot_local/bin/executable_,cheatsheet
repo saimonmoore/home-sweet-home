@@ -339,6 +339,82 @@ MISE (language/tool version manager)
     mise trust                     allow project mise.toml to run
                                    tasks/activations (safety prompt)
 
+PODMAN (container runtime, inside the VM)
+  Podman is the docker replacement in the VM. Rootless by default,
+  daemonless, mostly drop-in for `docker` and `docker compose`.
+
+  THE COMMAND CHAIN
+    docker            -> /usr/bin/docker is a thin shim from the
+                         podman-docker apt package. Forwards every
+                         arg to `podman` verbatim.
+    docker compose    -> shim forwards to `podman compose`, which
+                         is podman 4.x's built-in subcommand. It
+                         delegates to the python `podman-compose`
+                         binary (also installed). End result: any
+                         Makefile / script using `docker compose up`
+                         works unchanged.
+    docker-compose    -> use `podman-compose` directly if you want
+                         the legacy hyphenated form.
+
+  DAILY COMMANDS (podman or docker — pick one, both work)
+    podman ps                       running containers
+    podman ps -a                    include stopped
+    podman images                   local images
+    podman pull alpine:3.20         fetch image
+    podman run --rm -it alpine sh   throwaway container
+    podman run -d -p 3000:3000 \
+      --name web myimage            detached, port-published
+    podman logs -f web              follow logs
+    podman exec -it web sh          shell inside running container
+    podman stop web && podman rm web
+    podman build -t myimage .       build from Dockerfile
+    podman compose up               compose v2 (preferred form)
+    podman compose down
+
+  REGISTRIES / AUTH
+    podman login ghcr.io            (also works for docker.io,
+                                     quay.io, your private registry)
+    Auth file: ~/.config/containers/auth.json
+    Default registries config: /etc/containers/registries.conf
+
+  WHERE THINGS LIVE (rootless)
+    Images / layers / volumes:  ~/.local/share/containers/storage/
+    Run state (sockets, pids):  $XDG_RUNTIME_DIR/containers/
+    No system daemon — each `podman` invocation does its own thing.
+
+  CLEANUP
+    podman system df                disk usage
+    podman system prune             remove stopped containers,
+                                    dangling images, unused networks
+    podman system prune -a --volumes  nuke everything unused
+    podman rmi <image>              remove a specific image
+    podman volume prune             remove unused volumes
+
+  ROOTLESS GOTCHAS
+    Ports < 1024 require either CAP_NET_BIND_SERVICE on the binary
+      or a sysctl tweak — easier to just publish on a high port and
+      let lima vzNAT forward it.
+    User namespaces use subuid/subgid ranges (set up automatically
+      by the lima provisioning: 100000-165535 for `dev`).
+    `podman info` shows runtime details if something feels off.
+
+  COMPOSE SPECIFICS
+    docker-compose.yml is read as-is; v3.x is fine. The `podman
+    compose` subcommand respects the COMPOSE_FILE env var and
+    project naming the same way docker does.
+    Build context, env_file, volumes, networks all just work.
+    Healthchecks: same syntax.
+    `depends_on: condition: service_healthy` works.
+
+  PORT FORWARDING (VM -> host)
+    podman run -p 3000:3000 image             # publishes on VM
+                                              # 0.0.0.0
+    podman run -p 127.0.0.1:3000:3000 image   # on VM localhost
+                                              # -> host reaches at
+                                              #    http://localhost:3000
+                                              #    via lima vzNAT
+    See HOST <-> VM INTEGRATION below for details.
+
 HOME-SWEET-HOME HELPERS
   ,verify              host-side health check (installs / config / VM)
   ,chezmoi-init        re-apply the current machine's chezmoi state
@@ -452,14 +528,6 @@ HOST <-> VM INTEGRATION
 
     Paste from macOS clipboard into TUI apps: normal Cmd-V works in
     WezTerm and zellij; nvim's "+p reads back via OSC 52.
-
-  PODMAN (inside the VM)
-
-    podman run -p 3000:3000 image             # publishes on VM 0.0.0.0
-    podman run -p 127.0.0.1:3000:3000 image   # on VM localhost
-                                              # -> reaches host as
-                                              #    http://localhost:3000
-                                              #    via vzNAT
 
 Tip:
   Most of these tools have built-in help on ? or a visible key legend
