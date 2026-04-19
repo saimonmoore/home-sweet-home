@@ -14,7 +14,11 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 mkdir -p "$(dirname "$config_dir")"
-git clone --depth 1 https://github.com/LazyVim/starter "$config_dir"
+# Bypass any `url."git@github.com:".insteadOf = https://github.com/` rewrite
+# from the VM gitconfig so this bootstrap works on a brand-new VM before
+# the user has registered ~/.ssh/id_ed25519.pub with GitHub.
+git -c 'url.https://github.com/.insteadOf=' \
+    clone --depth 1 https://github.com/LazyVim/starter "$config_dir"
 rm -rf "$config_dir/.git"
 
 echo "LazyVim starter cloned into $config_dir."
