@@ -381,10 +381,15 @@ PODMAN (container runtime, inside the VM)
                          arg to `podman` verbatim.
     docker compose    -> shim forwards to `podman compose`, which
                          is podman 4.x's built-in subcommand. It
-                         delegates to the python `podman-compose`
-                         binary (also installed). End result: any
-                         Makefile / script using `docker compose up`
-                         works unchanged.
+                         delegates to whatever external compose
+                         provider ~/.config/containers/containers.conf
+                         pins — home-sweet-home pins it to
+                         `podman-compose` (the python v2 rewrite).
+                         Without that pin, podman probes PATH for
+                         `docker-compose` first and may pick up the
+                         ancient apt v1 binary, which uses different
+                         arg ordering and breaks Makefiles that
+                         assume compose v2.
     docker-compose    -> use `podman-compose` directly if you want
                          the legacy hyphenated form.
 
