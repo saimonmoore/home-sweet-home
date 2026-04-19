@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Install tool versions declared in ~/.config/mise/config.toml. On a
+# fresh machine (host or VM) mise itself is in place — brew bundle on
+# macOS, lima/dev-ubuntu-system.sh on Linux — but the actual
+# language/tool binaries (node, npx, zellij, nvim, etc.) are not
+# present until `mise install` runs. Later chezmoi hooks (openskills
+# needs npx) rely on mise's shims being populated, so we install now.
+#
+# Sorts alphabetically after run_once_after_host-brew-bundle (brew
+# puts mise in place on macOS) and before run_onchange_after_openskills
+# (which needs npx).
+
+if ! command -v mise >/dev/null 2>&1; then
+	echo "warn: mise not found on PATH; skipping 'mise install'." >&2
+	echo "      install mise first (brew / lima bootstrap) and re-run chezmoi apply." >&2
+	exit 0
+fi
+
+# `mise install` without args installs every tool declared in the
+# merged mise config, with caches, in parallel. --yes auto-accepts any
+# prompts (e.g. for first-time trust of config files).
+mise install --yes
