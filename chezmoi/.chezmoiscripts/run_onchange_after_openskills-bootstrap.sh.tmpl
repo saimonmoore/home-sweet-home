@@ -97,7 +97,7 @@ if [[ -d "$SKILLS_ROOT" ]]; then
 
 	for name in "${to_remove[@]}"; do
 		echo "==> openskills remove $name (not in manifest)"
-		npx --yes openskills remove "$name" --yes || true
+		npx --yes openskills remove "$name" || true
 	done
 fi
 
