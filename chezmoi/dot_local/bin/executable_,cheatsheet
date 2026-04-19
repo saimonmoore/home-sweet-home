@@ -106,8 +106,12 @@ ZELLIJ
   PANE ACTIONS — LOCKED MODE (the daily driver)
     Alt-Left / Down / Up / Right    move focus
     Alt-h                           split pane down (horizontal split)
-    Alt-s                           new stacked pane
     Alt-x                           close focused pane
+
+    For an occasional stacked pane, run from any shell:
+      zellij action new-pane --stacked
+    (no keybind for this yet — `NewPane "Stacked"` isn't in any
+     released zellij version; it lives only on main branch.)
 
   PANE ACTIONS — NORMAL MODE (after Alt-a to unlock)
     Alt-h / Alt-j / Alt-k           move focus left/down/up
