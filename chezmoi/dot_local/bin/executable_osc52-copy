@@ -1,12 +1,20 @@
 #!/usr/bin/env sh
-# Read stdin and emit an OSC 52 escape sequence to the controlling
-# terminal so the enclosing terminal emulator (WezTerm on the macOS
-# host) writes the content to the system clipboard.
+# Read stdin and emit an OSC 52 escape sequence to stdout so the
+# enclosing terminal (WezTerm on the macOS host) writes the content
+# to the system clipboard.
 #
-# Used as zellij's `copy_command` inside the lima dev VM, where
-# there's no xclip / wl-copy / pbcopy to forward selections to. Works
-# on the host too — WezTerm happily accepts OSC 52 regardless of
-# whether zellij is in the chain.
+# Writing to stdout (as opposed to /dev/tty) turns out to be the
+# reliable path in every context we care about:
+#
+#   - Interactive shell: stdout is the pty, bytes reach the terminal.
+#   - Pipeline (`echo x | osc52-copy`): stdout is inherited from the
+#     shell, still a pty, still flows to the terminal.
+#   - lima's `limactl shell dev -- …` one-shot: /dev/tty is often
+#     unallocated or not routed to WezTerm, but stdout is piped
+#     straight back to the host shell -> WezTerm.
+#
+# Works identically on the macOS host too, so a single script is
+# right for both machines.
 
 set -eu
 
@@ -15,4 +23,4 @@ set -eu
 max_bytes=3000000
 
 data="$(head -c "$max_bytes" | base64 | tr -d '\n')"
-printf '\033]52;c;%s\007' "$data" > /dev/tty
+printf '\033]52;c;%s\007' "$data"
