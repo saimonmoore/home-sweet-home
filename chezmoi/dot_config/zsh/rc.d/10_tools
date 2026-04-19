@@ -41,7 +41,17 @@ if command -v zoxide >/dev/null 2>&1; then
 fi
 
 if command -v fzf >/dev/null 2>&1 && [[ -t 0 && -t 1 ]]; then
-	source <(fzf --zsh)
+	# `fzf --zsh` was added in fzf 0.48.0. Ubuntu 24.04 LTS ships 0.44.1,
+	# which errors with "unknown option: --zsh". Fall back to the keybinding
+	# files the distro drops under /usr/share/doc/fzf/examples in that case.
+	if fzf --help 2>&1 | grep -q -- '--zsh'; then
+		source <(fzf --zsh)
+	else
+		for fzf_rc in /usr/share/doc/fzf/examples/key-bindings.zsh \
+			/usr/share/doc/fzf/examples/completion.zsh; do
+			[[ -r "$fzf_rc" ]] && source "$fzf_rc"
+		done
+	fi
 fi
 
 for autosuggestions_script in \

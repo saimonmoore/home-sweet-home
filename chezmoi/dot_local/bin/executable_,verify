@@ -34,7 +34,7 @@ for t in brew chezmoi git; do
 done
 
 section "Brewfile tools (spot-check)"
-for t in eza fzf ripgrep fd lazygit lima gh jq bat nb; do
+for t in eza fzf rg fd lazygit lima gh jq bat nb; do
 	if command -v "$t" >/dev/null 2>&1; then
 		ok "$t"
 	else

@@ -99,7 +99,7 @@ occasionally pause for macOS to ask permission for a cask install
 `,verify` on the host checks:
 
 - Homebrew, chezmoi, git installed
-- Spot-check of Brewfile CLIs (`eza`, `fzf`, `ripgrep`, `fd`,
+- Spot-check of Brewfile CLIs (`eza`, `fzf`, `rg` (from ripgrep), `fd`,
   `lazygit`, `lima`, `gh`, `jq`, `bat`, `nb`)
 - `chezmoi status` — no pending changes
 - Git aliases loaded (`git pam` et al.) + `commit.gpgsign = true`
@@ -184,7 +184,7 @@ commits:
   metadata openskills needs to fetch each skill.
 
 After every `chezmoi apply`, the
-`run_after_agent-skills-bootstrap.sh.tmpl` hook reconciles disk state
+`run_onchange_after_openskills-bootstrap.sh.tmpl` hook reconciles disk state
 against the manifest:
 
 1. reads the unique `source` values from the committed
