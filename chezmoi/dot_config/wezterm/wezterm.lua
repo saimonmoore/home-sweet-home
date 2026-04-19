@@ -41,6 +41,12 @@ config.default_cursor_style = "SteadyBar"
 config.send_composed_key_when_left_alt_is_pressed = false
 config.send_composed_key_when_right_alt_is_pressed = false
 
+-- Advertise as xterm-256color so remote Linux systems (lima VM, SSH
+-- targets) always have a matching terminfo entry. WezTerm's own "wezterm"
+-- terminfo doesn't ship with Ubuntu, and a mismatched $TERM breaks
+-- arrow-key escape sequences inside TUI apps like nvim.
+config.term = "xterm-256color"
+
 local function activate_tab(index)
 	return wezterm.action_callback(function(window, pane)
 		window:perform_action(act.ActivateTab(index), pane)
