@@ -24,7 +24,7 @@ kept on the Desktop as a one-click reference.
 
 ## Host vs VM
 
-**Host (macOS):** minimal. Homebrew, chezmoi, Ghostty terminal,
+**Host (macOS):** minimal. Homebrew, chezmoi, WezTerm terminal,
 AeroSpace window manager, `nb` notes, 1Password CLI, the `,*` helper
 scripts — and the GUI apps from the Brewfile. All dev CLIs live in
 the VM.
@@ -41,8 +41,9 @@ Enter the VM with `,dev`. That drops you into a zellij session.
 ## Terminal IDE (inside the VM)
 
 Catppuccin Mocha everywhere. Locked-mode zellij keybindings — the
-chord is `Alt+<key>` (on macOS with Ghostty's `macos-option-as-alt
-= true`, that's just **Option+<key>**).
+chord is `Alt+<key>` (on macOS with WezTerm's
+`send_composed_key_when_*_alt_is_pressed = false`, that's just
+**Option+<key>**).
 
 | Tool       | Role                                     | Floating zellij binding |
 |------------|------------------------------------------|-------------------------|

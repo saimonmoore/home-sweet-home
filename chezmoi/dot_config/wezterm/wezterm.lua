@@ -34,6 +34,13 @@ config.window_padding = {
 
 config.default_cursor_style = "SteadyBar"
 
+-- Send Option+<key> as Alt+<key> to the terminal. Zellij (running inside
+-- WezTerm via `,dev`) is our pane/tab/split manager, and its chords are
+-- plain `Alt+<letter>`. Without this, macOS Option composes special
+-- characters (ƒ, ∂, …) instead of sending Alt modifiers.
+config.send_composed_key_when_left_alt_is_pressed = false
+config.send_composed_key_when_right_alt_is_pressed = false
+
 local function activate_tab(index)
 	return wezterm.action_callback(function(window, pane)
 		window:perform_action(act.ActivateTab(index), pane)

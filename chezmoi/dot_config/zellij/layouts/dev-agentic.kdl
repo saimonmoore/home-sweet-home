@@ -6,7 +6,15 @@ layout {
     }
 
     pane split_direction="vertical" {
-        pane name="nvim" command="nvim" size="70%" focus=true
-        pane name="agent" command=",agent" size="30%"
+        // Run nvim inside a login zsh so `:q` drops into a shell instead of
+        // closing the pane (and with it, potentially the whole session).
+        pane name="nvim" command="zsh" size="70%" focus=true {
+            args "-lc" "nvim; exec zsh"
+        }
+        // Same pattern for the agent pane — if ,agent crashes or exits,
+        // you get a shell to fix/relaunch from, not a dead pane.
+        pane name="agent" command="zsh" size="30%" {
+            args "-lc" ",agent; exec zsh"
+        }
     }
 }

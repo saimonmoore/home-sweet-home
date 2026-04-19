@@ -373,8 +373,8 @@ Catppuccin Mocha Black theme. Custom urgency coefficients bias `+bug`,
 - Brewfile: `bootstrap/host/Brewfile`. Runs via
   `run_once_after_host-brew-bundle.sh.tmpl` only when
   `develop=false AND darwin`.
-- Terminal emulator: Ghostty (brew cask). WezTerm config is present but
-  ignored on macOS — it's kept for reference/alt use.
+- Terminal emulator: WezTerm (brew cask). Config at
+  `chezmoi/dot_config/wezterm/wezterm.lua`.
 - Lazygit's macOS config lives under `chezmoi/Library/Application Support/`
   via chezmoi's Library handling.
 

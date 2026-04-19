@@ -6,7 +6,11 @@ layout {
     }
 
     pane split_direction="vertical" {
-        pane name="nvim" command="nvim" size="70%" focus=true
+        // Run nvim inside a login zsh so `:q` drops into a shell instead of
+        // closing the pane (and with it, potentially the whole session).
+        pane name="nvim" command="zsh" size="70%" focus=true {
+            args "-lc" "nvim; exec zsh"
+        }
         pane name="shell" size="30%"
     }
 }
