@@ -380,29 +380,34 @@ PODMAN (container runtime, inside the VM)
                          podman-docker apt package. Forwards every
                          arg to `podman` verbatim.
     docker compose    -> shim forwards to `podman compose`, which
-                         is podman 4.x's built-in subcommand. It
-                         delegates to whatever external compose
-                         provider ~/.config/containers/containers.conf
-                         pins — home-sweet-home pins it to
-                         `podman-compose` (the python v2 rewrite).
-                         Without that pin, podman probes PATH for
-                         `docker-compose` first and may pick up the
-                         ancient apt v1 binary, which uses different
-                         arg ordering and breaks Makefiles that
-                         assume compose v2.
-    podman-compose    -> apt ships 1.0.6 (no --profile, no other
-                         compose-v2-era flags). The VM bootstrap
-                         also runs `pipx install podman-compose` so
-                         ~/.local/bin/podman-compose (1.5.0+) shadows
-                         the apt binary for the `dev` user. If a
-                         Makefile barfs with "invalid choice" errors
-                         on flags like --profile, confirm which
-                         binary is first:
-                           which podman-compose
-                           podman-compose version
-                         Expect `~/.local/bin/...` and 1.5+.
-    docker-compose    -> use `podman-compose` directly if you want
-                         the legacy hyphenated form.
+                         reads ~/.config/containers/containers.conf
+                         and calls the external compose provider.
+                         home-sweet-home installs REAL docker compose
+                         v2 (the Go binary, /usr/local/lib/docker/
+                         cli-plugins/docker-compose) and pins it as
+                         the primary provider. docker compose v2
+                         talks to podman via DOCKER_HOST (set in
+                         ~/.zprofile) pointing at the user's podman
+                         socket ($XDG_RUNTIME_DIR/podman/podman.sock,
+                         enabled by a chezmoi run_once hook).
+                         End result: the full docker-compose-spec —
+                         environment-sourced secrets, depends_on
+                         conditions, named profiles, etc. — works in
+                         the VM identically to real docker on macOS.
+    podman-compose    -> kept installed via pipx (latest) as a
+                         fallback provider, but rarely the one
+                         podman picks. `podman-compose` still runs
+                         directly if invoked by name.
+    DIAGNOSTICS       -> if a Makefile barfs on compose flags:
+                           podman compose version
+                         should print `Docker Compose version vX.Y.Z`
+                         (the Go binary). If it prints `podman-
+                         compose version N.M.L` (Python), the v2
+                         binary is missing or the user socket isn't
+                         running. Check:
+                           ls -l /usr/local/lib/docker/cli-plugins/
+                           systemctl --user status podman.socket
+                           echo $DOCKER_HOST
 
   DAILY COMMANDS (podman or docker — pick one, both work)
     podman ps                       running containers

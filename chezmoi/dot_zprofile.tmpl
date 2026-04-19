@@ -1,0 +1,18 @@
+# PATH additions live here (not in .zshrc / rc.d) so they're available
+# in non-interactive login shells too — e.g. `zsh -lc ",agent"` from a
+# zellij layout. Interactive shells inherit from this, and
+# `typeset -U path PATH` in rc.d/05_homebrew.tmpl dedupes on reload.
+export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+
+{{- if eq .chezmoi.os "linux" }}
+
+# In the Linux dev VM, route `docker compose` / `docker` calls through
+# podman's Docker-compatible API socket. Paired with real docker
+# compose v2 as the compose provider in ~/.config/containers/
+# containers.conf, this gives us full compose-spec support
+# (environment-sourced secrets, etc.) without running actual docker.
+# The podman user socket is enabled by the chezmoi
+# run_once_after_vm-podman-socket.sh hook.
+export DOCKER_HOST="unix://${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/podman/podman.sock"
+{{- end }}

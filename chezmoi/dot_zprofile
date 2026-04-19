@@ -1,6 +1,0 @@
-# PATH additions live here (not in .zshrc / rc.d) so they're available
-# in non-interactive login shells too — e.g. `zsh -lc ",agent"` from a
-# zellij layout. Interactive shells inherit from this, and
-# `typeset -U path PATH` in rc.d/05_homebrew.tmpl dedupes on reload.
-export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-export PATH="$HOME/.local/share/mise/shims:$PATH"

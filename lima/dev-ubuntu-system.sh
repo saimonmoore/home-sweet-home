@@ -46,8 +46,9 @@ fi
 # Upgrade podman-compose beyond Ubuntu 24.04's apt 1.0.6 (too old for
 # --profile and other docker-compose-v2 flags). pipx drops the latest
 # release in ~dev/.local/bin, which shadows /usr/bin/podman-compose on
-# the dev user's PATH (set in ~/.zprofile). The apt version stays as
-# a fallback.
+# the dev user's PATH (set in ~/.zprofile). Kept as a fallback for
+# anything invoking podman-compose directly; the primary compose
+# provider is real docker compose v2 (installed below).
 sudo -u dev -H bash -c '
 	set -eu
 	export PATH="$HOME/.local/bin:$PATH"
@@ -57,3 +58,30 @@ sudo -u dev -H bash -c '
 		pipx install podman-compose
 	fi
 '
+
+# Install real docker compose v2 (Go binary). Wired in as podman's
+# external compose provider via ~/.config/containers/containers.conf.
+# It supports every docker-compose-spec feature (environment-sourced
+# secrets, named profiles, healthcheck conditions, etc.) and talks to
+# podman's user socket via DOCKER_HOST set in ~/.zprofile.
+DOCKER_COMPOSE_VERSION="v5.1.3"
+case "$(dpkg --print-architecture)" in
+amd64) COMPOSE_ARCH=x86_64 ;;
+arm64) COMPOSE_ARCH=aarch64 ;;
+*)
+	echo "unsupported architecture for docker compose v2: $(dpkg --print-architecture)" >&2
+	exit 1
+	;;
+esac
+install -d /usr/local/lib/docker/cli-plugins
+if [[ ! -x /usr/local/lib/docker/cli-plugins/docker-compose ]] \
+	|| ! /usr/local/lib/docker/cli-plugins/docker-compose version --short 2>/dev/null | grep -q "^${DOCKER_COMPOSE_VERSION#v}$"; then
+	curl -fsSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${COMPOSE_ARCH}" \
+		-o /usr/local/lib/docker/cli-plugins/docker-compose
+	chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+fi
+
+# Let the dev user's systemd session persist across SSH disconnects so
+# podman.socket (which compose v2 talks to via DOCKER_HOST) stays up
+# even when no interactive shell is attached.
+loginctl enable-linger dev

@@ -1,0 +1,32 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Enable the podman user socket in the VM. docker compose v2 (our
+# external compose provider, installed by lima/dev-ubuntu-system.sh)
+# talks to this socket via DOCKER_HOST (set in ~/.zprofile), so it
+# must be running before `docker compose` / `make install` will work.
+#
+# This runs as the dev user under `chezmoi apply`, so the user
+# systemd session and $XDG_RUNTIME_DIR are available. `--now` starts
+# it immediately; `enable` persists across reboots (plus enable-linger
+# from the system bootstrap keeps it up across SSH disconnects).
+
+if ! command -v systemctl >/dev/null 2>&1; then
+	echo "systemctl not found — skipping podman user socket enable." >&2
+	exit 0
+fi
+
+if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
+	echo "XDG_RUNTIME_DIR not set — skipping podman user socket enable." >&2
+	echo "Run 'systemctl --user enable --now podman.socket' manually once logged in." >&2
+	exit 0
+fi
+
+systemctl --user enable --now podman.socket
+
+echo "podman user socket enabled at $XDG_RUNTIME_DIR/podman/podman.sock"
+{{- else -}}
+#!/usr/bin/env bash
+exit 0
+{{- end }}
