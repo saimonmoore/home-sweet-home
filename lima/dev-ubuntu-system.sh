@@ -76,9 +76,16 @@ esac
 install -d /usr/local/lib/docker/cli-plugins
 if [[ ! -x /usr/local/lib/docker/cli-plugins/docker-compose ]] \
 	|| ! /usr/local/lib/docker/cli-plugins/docker-compose version --short 2>/dev/null | grep -q "^${DOCKER_COMPOSE_VERSION#v}$"; then
+	# Download to a tmpfile first and `install` atomically into place.
+	# curl writing directly into /usr/local/lib has been observed to
+	# fail occasionally (network blip, fs-cache race) with "Failure
+	# writing output to destination"; staging via /tmp and then
+	# `install`ing the fully-downloaded file is resilient to it.
+	dc_tmp="$(mktemp -t docker-compose.XXXXXX)"
 	curl -fsSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${COMPOSE_ARCH}" \
-		-o /usr/local/lib/docker/cli-plugins/docker-compose
-	chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+		-o "$dc_tmp"
+	install -m 0755 "$dc_tmp" /usr/local/lib/docker/cli-plugins/docker-compose
+	rm -f "$dc_tmp"
 fi
 
 # Let the dev user's systemd session persist across SSH disconnects so
