@@ -16,8 +16,18 @@ SKILLS_ROOT="$HOME/.agent/skills"
 MANIFEST="$HOME/.agent/openskills-manifest.txt"
 AGENTS_MD="$HOME/.agent/AGENTS.md"
 
+# chezmoi hooks run in a bash subshell that inherits whatever PATH the
+# invoking shell had. If the caller hasn't activated mise (which is the
+# normal case right after `mise install` in a pre-existing shell), its
+# shims aren't on PATH and npx is invisible even though node is
+# installed. Prepend the shims dir ourselves so this hook is robust
+# regardless of caller state.
+if [[ -d "$HOME/.local/share/mise/shims" ]]; then
+	export PATH="$HOME/.local/share/mise/shims:$PATH"
+fi
+
 if ! command -v npx >/dev/null 2>&1; then
-	echo "Error: npx missing. Install node on the host (Brewfile) or run 'mise install' in the VM." >&2
+	echo "Error: npx missing. On the host install node via the Brewfile; in the VM run 'mise install' and ensure ~/.local/share/mise/shims is reachable." >&2
 	exit 1
 fi
 
