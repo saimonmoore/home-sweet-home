@@ -308,27 +308,73 @@ HOME-SWEET-HOME HELPERS
   ,sync-jfrog-to-vm    (work only) copy JFrog creds into the VM
 
 HOST <-> VM INTEGRATION
-  File transfer:
-    ,vm-cp <src> <dst>         one-shot copy (wraps `limactl copy`)
-    ,vm-rsync <rsync-args> …   rsync via lima's ssh config; use this
-                               for large trees, incremental syncs, or
-                               anything needing rsync flags.
-    Escape hatch for ad-hoc SSH:
-      limactl show-ssh dev      (prints a usable ssh_config stanza)
 
-  Port forwarding (lima vzNAT — no manual setup needed):
-    VM binds to 127.0.0.1:PORT
-      host can `curl http://localhost:PORT` directly
-    VM binds to 0.0.0.0:PORT (incl. podman `-p PORT:PORT` defaults)
-      host reaches it via `http://$(,vm-ip):PORT`
-      or just run `,vm-open PORT` to open it in the browser
+  FILE TRANSFER — QUICK REFERENCE
+
+    ,vm-cp <src> <dst>
+        One-shot copy via `limactl copy` (scp under the hood). Best
+        for single files or a handful.
+          ,vm-cp ./notes.md vm:~/notes.md
+          ,vm-cp vm:~/build.log ./
+          ,vm-cp -r ./dist vm:~/deploy
+
+    ,vm-rsync <rsync-args> …
+        rsync via lima's ssh config. All flags forward to rsync
+        verbatim. Best for big trees, incremental syncs, or anything
+        wanting rsync flags (--dry-run, --delete, --exclude, partial
+        resume).
+          ,vm-rsync -avz --progress ./my-proj/ vm:~/code/my-proj/
+          ,vm-rsync -avz --delete  ./my-proj/ vm:~/code/my-proj/
+          ,vm-rsync --dry-run -avz ./my-proj/ vm:~/code/my-proj/
+          ,vm-rsync -avz vm:~/code/my-proj/dist/ ./dist/
+          ,vm-rsync -avz --exclude 'node_modules/' --exclude '.git/' \
+                    ./ vm:~/code/proj/
+
+    Paths on both: `vm:` prefix targets the VM, anything else is a
+    host path. VM paths without the prefix are just host paths —
+    watch for that when shell-completing.
+
+  FILE TRANSFER — WHEN TO USE WHICH
+
+    Single file or handful                    ,vm-cp
+    Whole directory, first time or mostly     ,vm-rsync -avz
+      unchanged
+    Mirror including deletions                ,vm-rsync -avz --delete
+    Preview before doing anything             ,vm-rsync --dry-run -avz
+    Resume an interrupted big transfer        ,vm-rsync (scp can't)
+
+  RSYNC GOTCHA — TRAILING SLASH
+
+    Trailing slash on the SOURCE changes semantics:
+      ,vm-rsync -avz ./src/  vm:~/dest/       # contents of src/ into dest/
+      ,vm-rsync -avz ./src   vm:~/dest/       # src/ itself into dest/
+                                              # (you get dest/src/…)
+
+  ESCAPE HATCH
+
+    For raw SSH (interactive shell, port-forwarded DB, etc.):
+      limactl show-ssh dev          # prints an ssh_config stanza
+      limactl show-ssh --format=cmd dev   # prints a ready ssh command
+
+  PORT FORWARDING — lima vzNAT (no manual setup needed)
+
+    VM service binds to 127.0.0.1:PORT
+      -> host reaches it at http://localhost:PORT (auto-forwarded)
+    VM service binds to 0.0.0.0:PORT (incl. podman `-p PORT:PORT`
+    defaults)
+      -> host reaches it via http://$(,vm-ip):PORT
+      -> or just run `,vm-open PORT` to open in the browser
+
     Prefer binding dev servers to 127.0.0.1 inside the VM — it's the
     boring path that Just Works on the host browser/curl.
 
-  Podman (inside the VM):
-    podman run -p 3000:3000 image       # publishes on VM 0.0.0.0
+  PODMAN (inside the VM)
+
+    podman run -p 3000:3000 image             # publishes on VM 0.0.0.0
     podman run -p 127.0.0.1:3000:3000 image   # on VM localhost
-        -> reaches host as http://localhost:3000 via vzNAT
+                                              # -> reaches host as
+                                              #    http://localhost:3000
+                                              #    via vzNAT
 
 Tip:
   Most of these tools have built-in help on ? or a visible key legend
