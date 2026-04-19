@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Copy files between the macOS host and the lima dev VM.
+#
+# Paths prefixed with `vm:` refer to the VM (resolved to `dev:` under
+# the hood so callers don't need to know the lima instance name).
+# Paths without that prefix are host paths.
+#
+# Examples:
+#   ,vm-cp ./notes.md vm:~/notes.md              # host -> VM
+#   ,vm-cp vm:~/build.log ./                     # VM -> host
+#   ,vm-cp -r ./dist vm:~/deploy                 # recursive push
+#   ,vm-cp -r vm:~/code/myproj ./myproj          # recursive pull
+#
+# Under the hood: `limactl copy` (scp against lima's own SSH config).
+# For very large trees you may prefer `rsync` over a manual SSH session
+# via `limactl show-ssh dev`.
+
+set -euo pipefail
+
+if ! command -v limactl >/dev/null 2>&1; then
+	echo "Error: limactl is not on PATH. Install via the host Brewfile." >&2
+	exit 1
+fi
+
+if [[ $# -lt 2 ]]; then
+	sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
+	exit 2
+fi
+
+# Rewrite `vm:` -> `dev:` (lima's VM name) so the user interface stays
+# repo-portable; if you rename the VM, only this script needs updating.
+args=()
+for arg in "$@"; do
+	case "$arg" in
+		vm:*) args+=("dev:${arg#vm:}") ;;
+		*)    args+=("$arg") ;;
+	esac
+done
+
+exec limactl copy "${args[@]}"

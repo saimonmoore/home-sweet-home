@@ -293,7 +293,32 @@ HOME-SWEET-HOME HELPERS
   ,create-vm           create the Ubuntu lima VM (first time only)
   ,vm-ip               print the dev VM's IPv4 address
   ,vm-open [PORT]      open http://<vm-ip>[:PORT] in the host browser
+  ,vm-cp <src> <dst>   copy files host <-> VM. Prefix VM paths with
+                       `vm:` — e.g. `,vm-cp ./file vm:~/file`,
+                       `,vm-cp -r vm:~/build ./build`.
   ,sync-jfrog-to-vm    (work only) copy JFrog creds into the VM
+
+HOST <-> VM INTEGRATION
+  File transfer:
+    ,vm-cp <src> <dst>      one-shot copy (wraps `limactl copy`)
+    For large trees or incremental syncs:
+      rsync -avz -e 'limactl shell dev --' ./src/ dev@VM:/dest/
+    or open an explicit SSH session:
+      limactl show-ssh dev
+
+  Port forwarding (lima vzNAT — no manual setup needed):
+    VM binds to 127.0.0.1:PORT
+      host can `curl http://localhost:PORT` directly
+    VM binds to 0.0.0.0:PORT (incl. podman `-p PORT:PORT` defaults)
+      host reaches it via `http://$(,vm-ip):PORT`
+      or just run `,vm-open PORT` to open it in the browser
+    Prefer binding dev servers to 127.0.0.1 inside the VM — it's the
+    boring path that Just Works on the host browser/curl.
+
+  Podman (inside the VM):
+    podman run -p 3000:3000 image       # publishes on VM 0.0.0.0
+    podman run -p 127.0.0.1:3000:3000 image   # on VM localhost
+        -> reaches host as http://localhost:3000 via vzNAT
 
 Tip:
   Most of these tools have built-in help on ? or a visible key legend
