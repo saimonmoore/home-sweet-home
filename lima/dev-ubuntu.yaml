@@ -7,8 +7,8 @@ vmType: vz
 networks:
   - vzNAT: true
 cpus: 6
-memory: 6GiB
-disk: 60GiB
+memory: 12GiB
+disk: 250GiB
 plain: true
 
 user:
