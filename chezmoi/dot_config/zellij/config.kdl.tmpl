@@ -22,7 +22,7 @@ keybinds {
         bind "Alt l" { SwitchToMode "Locked"; }
 
         // Floating tools
-        bind "Alt F" {
+        bind "Alt f" {
             Run "zsh" "-l" {
                 floating true
                 x "7%"
@@ -32,7 +32,7 @@ keybinds {
                 close_on_exit true
             }
         }
-        bind "Alt G" {
+        bind "Alt g" {
             Run "lazygit" {
                 floating true
                 x "7%"
@@ -42,7 +42,7 @@ keybinds {
                 close_on_exit true
             }
         }
-        bind "Alt E" {
+        bind "Alt e" {
             Run "zsh" "-lc" "exec yazi \"$PWD\"" {
                 floating true
                 x "7%"
@@ -52,7 +52,7 @@ keybinds {
                 close_on_exit true
             }
         }
-        bind "Alt R" {
+        bind "Alt r" {
             Run "scooter" {
                 floating true
                 x "7%"
@@ -63,7 +63,7 @@ keybinds {
             }
         }
 {{- if $needsTaskwarrior }}
-        bind "Alt W" {
+        bind "Alt w" {
             Run {{ joinPath .chezmoi.homeDir ".local" "bin" ",task-popup" | quote }} {
                 cwd "."
                 floating true
@@ -88,21 +88,21 @@ keybinds {
         }
 
         // Pane actions
-        bind "Alt H" { MoveFocus "Left"; }
-        bind "Alt J" { MoveFocus "Down"; }
-        bind "Alt K" { MoveFocus "Up"; }
-        bind "Alt L" { MoveFocus "Right"; }
-        bind "Alt V" { NewPane "Right"; }
-        bind "Alt O" { TogglePaneEmbedOrFloating; }
-        bind "Alt Z" { ToggleFocusFullscreen; }
+        bind "Alt h" { MoveFocus "Left"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+        // Alt l handled above (mode switch) — move-focus-right in locked only
+        bind "Alt v" { NewPane "Right"; }
+        bind "Alt o" { TogglePaneEmbedOrFloating; }
+        bind "Alt z" { ToggleFocusFullscreen; }
 
         // Tab actions
-        bind "Alt T" { NewTab; }
-        bind "Alt M" { SwitchToMode "RenameTab"; }
-        bind "Alt N" { GoToNextTab; }
-        bind "Alt P" { GoToPreviousTab; }
-        bind "Alt Q" { CloseTab; }
-        bind "Alt D" { Detach; }
+        bind "Alt t" { NewTab; }
+        bind "Alt m" { SwitchToMode "RenameTab"; }
+        bind "Alt n" { GoToNextTab; }
+        bind "Alt p" { GoToPreviousTab; }
+        bind "Alt q" { CloseTab; }
+        bind "Alt d" { Detach; }
         bind "Alt 1" { GoToTab 1; }
         bind "Alt 2" { GoToTab 2; }
         bind "Alt 3" { GoToTab 3; }
@@ -118,7 +118,7 @@ keybinds {
         bind "Alt a" { SwitchToMode "Normal"; }
 
         // Floating tools
-        bind "Alt F" {
+        bind "Alt f" {
             Run "zsh" "-l" {
                 floating true
                 x "7%"
@@ -128,7 +128,7 @@ keybinds {
                 close_on_exit true
             }
         }
-        bind "Alt G" {
+        bind "Alt g" {
             Run "lazygit" {
                 floating true
                 x "7%"
@@ -138,7 +138,7 @@ keybinds {
                 close_on_exit true
             }
         }
-        bind "Alt E" {
+        bind "Alt e" {
             Run "zsh" "-lc" "exec yazi \"$PWD\"" {
                 floating true
                 x "7%"
@@ -148,7 +148,7 @@ keybinds {
                 close_on_exit true
             }
         }
-        bind "Alt R" {
+        bind "Alt r" {
             Run "scooter" {
                 floating true
                 x "7%"
@@ -159,7 +159,7 @@ keybinds {
             }
         }
 {{- if $needsTaskwarrior }}
-        bind "Alt W" {
+        bind "Alt w" {
             Run {{ joinPath .chezmoi.homeDir ".local" "bin" ",task-popup" | quote }} {
                 cwd "."
                 floating true
@@ -184,23 +184,23 @@ keybinds {
         }
 
         // Pane actions
-        bind "Alt H" { MoveFocus "Left"; }
-        bind "Alt J" { MoveFocus "Down"; }
-        bind "Alt K" { MoveFocus "Up"; }
-        bind "Alt L" { MoveFocus "Right"; }
-        bind "Alt V" { NewPane "Right"; }
-        bind "Alt O" { TogglePaneEmbedOrFloating; }
-        bind "Alt Z" { ToggleFocusFullscreen; }
+        bind "Alt h" { MoveFocus "Left"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+        bind "Alt l" { MoveFocus "Right"; }
+        bind "Alt v" { NewPane "Right"; }
+        bind "Alt o" { TogglePaneEmbedOrFloating; }
+        bind "Alt z" { ToggleFocusFullscreen; }
 
         // Tab actions
-        bind "Alt T" { NewTab; }
-        bind "Alt M" { SwitchToMode "RenameTab"; }
-        bind "Alt N" { GoToNextTab; }
-        bind "Alt P" { GoToPreviousTab; }
-        bind "Alt Q" { CloseTab; }
+        bind "Alt t" { NewTab; }
+        bind "Alt m" { SwitchToMode "RenameTab"; }
+        bind "Alt n" { GoToNextTab; }
+        bind "Alt p" { GoToPreviousTab; }
+        bind "Alt q" { CloseTab; }
 
         // Session actions
-        bind "Alt D" { Detach; }
+        bind "Alt d" { Detach; }
         bind "Alt 1" { GoToTab 1; }
         bind "Alt 2" { GoToTab 2; }
         bind "Alt 3" { GoToTab 3; }

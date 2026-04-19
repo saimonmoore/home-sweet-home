@@ -41,15 +41,16 @@ Enter the VM with `,dev`. That drops you into a zellij session.
 ## Terminal IDE (inside the VM)
 
 Catppuccin Mocha everywhere. Locked-mode zellij keybindings — the
-chord is always `Alt+Shift+<key>`.
+chord is `Alt+<key>` (on macOS with Ghostty's `macos-option-as-alt
+= true`, that's just **Option+<key>**).
 
 | Tool       | Role                                     | Floating zellij binding |
 |------------|------------------------------------------|-------------------------|
 | Neovim (LazyVim) | Editor. `nvim`.                    | inline in dev layout    |
 | Zellij     | Terminal multiplexer / layouts.          | —                       |
-| Lazygit    | Git UI.                                  | `Alt+Shift+g`           |
-| Yazi       | File manager. Opens files in nvim.       | `Alt+Shift+e`           |
-| Scooter    | Workspace-wide search & replace.         | `Alt+Shift+r`           |
+| Lazygit    | Git UI.                                  | `Alt+g`           |
+| Yazi       | File manager. Opens files in nvim.       | `Alt+e`           |
+| Scooter    | Workspace-wide search & replace.         | `Alt+r`           |
 | Delta      | Better `git diff` paging.                | —                       |
 
 Zellij layouts (`,zlayout <name>` or the shortcuts):
