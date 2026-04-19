@@ -390,6 +390,17 @@ PODMAN (container runtime, inside the VM)
                          ancient apt v1 binary, which uses different
                          arg ordering and breaks Makefiles that
                          assume compose v2.
+    podman-compose    -> apt ships 1.0.6 (no --profile, no other
+                         compose-v2-era flags). The VM bootstrap
+                         also runs `pipx install podman-compose` so
+                         ~/.local/bin/podman-compose (1.5.0+) shadows
+                         the apt binary for the `dev` user. If a
+                         Makefile barfs with "invalid choice" errors
+                         on flags like --profile, confirm which
+                         binary is first:
+                           which podman-compose
+                           podman-compose version
+                         Expect `~/.local/bin/...` and 1.5+.
     docker-compose    -> use `podman-compose` directly if you want
                          the legacy hyphenated form.
 

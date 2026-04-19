@@ -9,6 +9,7 @@ apt-get install -y --no-install-recommends \
 	podman podman-compose podman-docker uidmap \
 	ripgrep fd-find bat eza zoxide fzf jq \
 	tar unzip gzip \
+	pipx \
 	build-essential
 
 # Ubuntu ships fd-find as `fdfind` and bat as `batcat`. The zsh config
@@ -41,3 +42,18 @@ install -d -m 755 -o dev -g dev /home/dev/code
 if ! command -v mise >/dev/null 2>&1; then
 	curl https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise sh
 fi
+
+# Upgrade podman-compose beyond Ubuntu 24.04's apt 1.0.6 (too old for
+# --profile and other docker-compose-v2 flags). pipx drops the latest
+# release in ~dev/.local/bin, which shadows /usr/bin/podman-compose on
+# the dev user's PATH (set in ~/.zprofile). The apt version stays as
+# a fallback.
+sudo -u dev -H bash -c '
+	set -eu
+	export PATH="$HOME/.local/bin:$PATH"
+	if pipx list --short 2>/dev/null | grep -q "^podman-compose "; then
+		pipx upgrade podman-compose || true
+	else
+		pipx install podman-compose
+	fi
+'
