@@ -11,10 +11,10 @@ config.color_scheme = "Catppuccin Mocha"
 config.colors = {
 	background = "#000000",
 }
+-- Hack Nerd Font Mono ships via `cask "font-hack-nerd-font"` in the host
+-- Brewfile, so it's guaranteed present on any bootstrapped machine.
 config.font = wezterm.font_with_fallback({
-	{ family = "Maple Mono NF", weight = "Medium" },
-	{ family = "FiraCode Nerd Font Mono", weight = "Medium" },
-	{ family = "FiraCode Nerd Font", weight = "Medium" },
+	{ family = "Hack Nerd Font Mono", weight = "Medium" },
 })
 config.font_size = 13.7
 config.freetype_load_target = "Normal"
