@@ -64,57 +64,144 @@ LAZYGIT
 
 ZELLIJ
   Launch:
-    zellij
+    zellij                    (or ,zj [name] / ,dev from the host)
 
-  Your setup starts locked.
+  Your setup starts in LOCKED mode. In Locked, almost every key
+  passes straight through to the focused pane (nvim, shell, ...).
+  Only the Alt chords below are intercepted by zellij.
 
-  Mode toggle:
-    Alt-a       unlock to Normal mode
-    Alt-a       lock again from any unlocked mode
+  MODES
+    Locked (default) app keys pass through; only Alt chords fire
+    Normal           zellij's standard mode; enables the Ctrl-prefix
+                     leaders (Ctrl-p Pane, Ctrl-t Tab, Ctrl-r Resize,
+                     Ctrl-s Search, Ctrl-o Session)
+    Pane/Tab/...     sub-modes entered from Normal via those Ctrl keys
 
-  Locked-mode quick actions:
-    Alt-Shift-h/j/k/l move focus
-    Alt-Shift-t       new tab
-    Alt-Shift-m       rename current tab
-    Alt-Shift-p       previous tab
-    Alt-Shift-n       next tab
-    Alt-1..9          go to tab 1..9
-    Alt-Shift-f       floating zsh in current directory
-    Alt-Shift-g       floating lazygit
-    Alt-Shift-r       floating scooter
-    Alt-Shift-e       floating yazi in current directory
-    Alt-Shift-?       floating cheatsheet
-    Alt-Shift-v       split pane right
-    Alt-Shift-o       toggle focused pane floating/embedded
-    Alt-Shift-z       zoom/unzoom focused pane
-    Alt-Shift-q       close tab and panes
-    Alt-Shift-d       detach session
-    Ctrl-o            open session manager
+  MODE SWITCHING
+    Alt-a       toggle Locked <-> Normal
+    Esc         exit a sub-mode back to Normal (without locking)
 
-  Notes:
-    compact layout is enabled
-    pane frames are enabled for focus visibility
+  macOS keyboard note:
+    WezTerm has `send_composed_key_when_*_alt_is_pressed = false`, so
+    Option+<letter> is sent as Alt+<letter> to the terminal. Every
+    `Alt-x` below is just `Option+x` on the Mac. No Shift required.
+
+  QUICK ACTIONS (work in both Locked and Normal)
+    Alt-h / Alt-j / Alt-k / Alt-l   move focus left/down/up/right
+    Alt-v                           split pane right
+    Alt-t                           new tab
+    Alt-m                           rename current tab
+    Alt-p / Alt-n                   previous / next tab
+    Alt-1 .. Alt-9                  jump to tab 1..9
+    Alt-q                           close tab (and its panes)
+    Alt-d                           detach session (see "Persistence")
+    Alt-o                           toggle focused pane floating/embedded
+    Alt-z                           zoom/unzoom focused pane
+
+    Alt-f                           floating zsh (cwd-aware)
+    Alt-g                           floating lazygit
+    Alt-e                           floating yazi (cwd-aware)
+    Alt-r                           floating scooter
+    Alt-?                           floating this cheatsheet
+
+  NORMAL-MODE DEFAULTS (after Alt-a to unlock)
+    Ctrl-p      Pane sub-mode  (n new, x close, d split-down,
+                                r split-right, f float, e embed, ...)
+    Ctrl-t      Tab sub-mode   (n new, x close, r rename, s sync-input)
+    Ctrl-r      Resize sub-mode (h/j/k/l grow, Shift+<dir> shrink)
+    Ctrl-s      Scroll / Search sub-mode (e edit in nvim, s search)
+    Ctrl-o      Session sub-mode (w session manager, d detach,
+                                  r resurrect)
+
+  SESSION PERSISTENCE
+    Zellij saves sessions to disk and resurrects pane/tab layout
+    on reattach.
+
+      ,zj my-project        create or attach session "my-project"
+      (arrange panes however you want)
+      Alt-d                 detach
+      ...later...
+      ,zj my-project        everything restored
+
+    Kill a specific session (including resurrection state):
+      zellij delete-session my-project -y
+    Nuke everything (useful when resetting):
+      zellij delete-all-sessions -y
+
+  NOTES
+    pane frames are off; focus is indicated via title colour
+    mouse mode is on (click to focus, drag to resize, wheel to scroll)
+    default theme: Catppuccin Mocha
     web server and web sharing are disabled
 
-WEZTERM
-  Tab shortcuts:
-    Super-Shift-l     switch to first tab
-    Super-Shift-d     switch to second tab
-    Super-Shift-n     switch to next tab
-    Super-Shift-p     switch to previous tab
-    Super-Shift-c     create tab
-    Super-Shift-r     rename current tab
+WEZTERM (host-side terminal)
+  Tab shortcuts (Super = Cmd on macOS):
+    Super-Shift-l     switch to first tab   (Cmd+Shift+L)
+    Super-Shift-d     switch to second tab  (Cmd+Shift+D)
+    Super-Shift-n     switch to next tab    (Cmd+Shift+N)
+    Super-Shift-p     switch to previous    (Cmd+Shift+P)
+    Super-Shift-c     create tab            (Cmd+Shift+C)
+    Super-Shift-r     rename current tab    (Cmd+Shift+R)
+    Super-+  Super--  font size up / down
+    Super-0           reset font size
+    Cmd-C / Cmd-V     copy / paste (no Shift)
 
   Notes:
-    default wezterm multiplexer bindings are disabled
-    persistent wezterm mux server is disabled
-    wezterm starts with local and dev tabs
+    WezTerm's default key bindings are disabled — every Option chord
+    passes through to zellij inside the VM.
+    config.term = "xterm-256color" so Ubuntu's terminfo is matched
+    on SSH into the lima VM.
+    Config: ~/.config/wezterm/wezterm.lua.
 
-  Project flows:
-    ,zdev       pick project with zoxide, open dev tab there
-    ,zagent     pick project with zoxide, open dev-agentic tab there
-    ,zlayout    pick project with zoxide, choose layout explicitly
-    ,zj [name]  attach/create zellij session, default local
+PROJECT TAB HELPERS
+  "Projects" are just directories zoxide knows about — anywhere
+  you've `cd`'d. Repo convention: clone via `,ghclone owner/repo` so
+  everything lands under ~/code/github/<owner>/<repo>/.
+
+    ,zdev              zoxide picker -> new tab with the `dev` layout
+                       (nvim 70% / shell 30%; :q drops to shell)
+    ,zagent            zoxide picker -> new tab with `dev-agentic`
+                       layout (nvim 70% / ,agent 30%)
+    ,zlayout <name>    zoxide picker -> new tab with a named layout
+                       (see ~/.config/zellij/layouts/*.kdl)
+    ,zj [name]         attach/create a zellij session (default: local)
+                       Detach with Alt-d; resurrect with same name.
+
+  PER-PROJECT LAYOUTS — TWO FLAVOURS
+
+  1. Reusable layouts by STACK (not by project).
+     Drop .kdl files under
+       chezmoi/dot_config/zellij/layouts/
+     e.g. rails.kdl, react.kdl, elixir.kdl. Use
+       ,zlayout rails
+     from any rails project. The layout describes the INITIAL pane
+     arrangement. Syntax docs:
+       https://zellij.dev/documentation/creating-a-layout
+
+  2. Named sessions per PROJECT.
+     Zellij resurrects sessions from disk, so state persists:
+       ,zj my-rails-app      (first time: create; later: re-attach)
+       (arrange panes)
+       Alt-d                 (detach; zellij writes layout to disk)
+       ...next time...
+       ,zj my-rails-app      (same panes/tabs back)
+     No .kdl authoring needed.
+
+AI CODING HARNESSES
+  The `dev-agentic` zellij layout runs `,agent` in its right pane,
+  which dispatches to whichever AI coding harness is currently
+  selected.
+
+    ,agent                    launch the currently selected harness
+    ,agent-select             show current + list of known harnesses
+    ,agent-select <name>      persist a selection (sticks across shells)
+    ,agent-select --clear     drop persistent choice; fall back to default
+
+  One-shot override:
+    AGENT_HARNESS=codex ,agent
+
+  Available harnesses depend on repo: work installs opencode + codex;
+  personal installs opencode + claude. See README for how to add more.
 
 SCOOTER
   Launch:
@@ -143,15 +230,15 @@ SCOOTER
     Ctrl-l      toggle preview wrapping
 
   In this setup:
-    e opens Neovim at the matching line and exits scooter
+    `e` opens Neovim at the matching line and exits scooter
     syntax highlighting uses Catppuccin Mocha
 
 NEOVIM / LAZYVIM
   Launch:
     nvim
 
-  LazyVim ships its own keymap; press <Space> in normal mode
-  to see the which-key popup with every leader binding.
+  LazyVim ships its own keymap; press <Space> in normal mode to see
+  the which-key popup with every leader binding.
 
   Frequently used leader bindings (default LazyVim):
     <Space>        open which-key menu
@@ -167,14 +254,50 @@ NEOVIM / LAZYVIM
     Neovim is installed via mise on develop machines
     config lives in ~/.config/nvim (LazyVim starter)
     yazi, scooter, and lazygit open files with nvim
+    arrow keys are re-enabled (LazyVim disables them by default —
+      override lives in chezmoi/dot_config/nvim/lua/config/keymaps.lua)
 
-PROJECT TAB HELPERS
-  ,zdev         zoxide picker -> new Zellij tab with dev layout
-  ,zagent       zoxide picker -> new Zellij tab with dev-agentic layout
-  ,zlayout dev  zoxide picker -> new tab with explicit layout
+NB (NOTES)
+  nb is the host-side notes CLI.
+
+    nb add "title"        create a new note
+    nb ls                 list notes
+    nb edit <id>          open in editor
+    nb sync               pull + push to GitHub
+    nb notebooks          list installed notebooks
+
+  Work: notebook ~/.nb/xing  -> git@github.com:saimon-moore/nb.git
+  Personal: notebook ~/.nb/home -> git@github.com:saimonmoore/nb.git
+
+OPENSKILLS (AGENT SKILLS)
+  Skills for all harnesses live in ~/.agent/skills/ and are managed
+  by openskills.
+
+    npx openskills install <src> --universal  install skill(s)
+    npx openskills list                        show installed
+    npx openskills update [name]              refresh from source(s)
+    npx openskills remove <name>              remove a skill
+    npx openskills sync -y -o ~/.agent/AGENTS.md  regen AGENTS.md
+
+  Declarative state lives in chezmoi:
+    chezmoi/dot_agent/openskills-manifest.txt
+    chezmoi/dot_agent/skills/<name>/.openskills.json
+  The run_onchange_after_openskills-bootstrap hook reconciles
+  ~/.agent/skills with the manifest on every chezmoi apply.
+
+HOME-SWEET-HOME HELPERS
+  ,verify              host-side health check (installs / config / VM)
+  ,chezmoi-init        re-apply the current machine's chezmoi state
+  ,chezmoi-update      pull home-sweet-home + apply
+  ,dev                 enter the dev VM (zellij session "dev")
+  ,create-vm           create the Ubuntu lima VM (first time only)
+  ,vm-ip               print the dev VM's IPv4 address
+  ,vm-open [PORT]      open http://<vm-ip>[:PORT] in the host browser
+  ,sync-jfrog-to-vm    (work only) copy JFrog creds into the VM
 
 Tip:
-  Most of these tools have built-in help on ? or a visible key legend at the bottom.
+  Most of these tools have built-in help on ? or a visible key legend
+  at the bottom.
 EOF
 
 if [[ -t 1 ]] && command -v less >/dev/null 2>&1; then
