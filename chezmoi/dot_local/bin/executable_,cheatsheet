@@ -89,6 +89,8 @@ ZELLIJ
   QUICK ACTIONS (both modes)
     Alt-t                           new tab
     Alt-m                           rename current tab
+    Alt-b                           rename current pane
+                                    (Enter commits, Esc cancels)
     Alt-p / Alt-n                   previous / next tab
     Alt-1 .. Alt-9                  jump to tab 1..9
     Alt-q                           close tab (and its panes)

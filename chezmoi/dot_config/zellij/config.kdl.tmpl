@@ -102,6 +102,7 @@ keybinds {
         bind "Alt v" { NewPane "Right"; }
         bind "Alt o" { TogglePaneEmbedOrFloating; }
         bind "Alt z" { ToggleFocusFullscreen; }
+        bind "Alt b" { SwitchToMode "RenamePane"; }
 
         // Tab actions
         bind "Alt t" { NewTab; }
@@ -201,6 +202,7 @@ keybinds {
         bind "Alt x" { CloseFocus; }
         bind "Alt o" { TogglePaneEmbedOrFloating; }
         bind "Alt z" { ToggleFocusFullscreen; }
+        bind "Alt b" { SwitchToMode "RenamePane"; }
 
         // Tab actions
         bind "Alt t" { NewTab; }
@@ -226,6 +228,12 @@ keybinds {
         bind "Ctrl c" { SwitchToMode "Locked"; }
         bind "Enter" { SwitchToMode "Locked"; }
         bind "Esc" { UndoRenameTab; SwitchToMode "Locked"; }
+    }
+
+    renamepane {
+        bind "Ctrl c" { SwitchToMode "Locked"; }
+        bind "Enter" { SwitchToMode "Locked"; }
+        bind "Esc" { UndoRenamePane; SwitchToMode "Locked"; }
     }
 
     shared_except "locked" {
