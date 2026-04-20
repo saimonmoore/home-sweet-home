@@ -127,6 +127,39 @@ lives now. Short version:
 Daily commands, VM networking, the terminal IDE stack, and `nb`
 basics are all covered on the Desktop README.
 
+### Moving files between host and VM
+
+Use `,vm-cp` for one-off copies and `,vm-rsync` for larger or
+repeated syncs.
+
+`vm:` prefixes a path inside the Lima guest. Paths without that
+prefix are on the macOS host.
+
+Quick copy with `,vm-cp`:
+
+```bash
+,vm-cp ./notes.md vm:~/notes.md      # host -> VM
+,vm-cp vm:~/build.log ./             # VM -> host
+,vm-cp -r ./dist vm:~/deploy         # recursive push
+,vm-cp -r vm:~/code/myproj ./myproj  # recursive pull
+```
+
+This wraps `limactl copy`, so it's the easiest choice for a single
+file or a small directory.
+
+Incremental sync with `,vm-rsync`:
+
+```bash
+,vm-rsync -avz --progress ./src/ vm:~/dest/
+,vm-rsync -avz --delete ./src/ vm:~/dest/
+,vm-rsync --dry-run -avz ./src/ vm:~/dest/
+,vm-rsync -avz vm:~/code/myproj/ ./myproj/
+```
+
+Use `,vm-rsync` when you want rsync features like `--dry-run`,
+`--delete`, `--exclude`, resumable transfers, or fast repeated syncs
+of a large tree.
+
 ---
 
 ## AI coding harnesses
