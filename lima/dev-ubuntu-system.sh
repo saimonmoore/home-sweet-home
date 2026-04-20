@@ -7,6 +7,7 @@ apt-get update
 apt-get install -y --no-install-recommends \
 	ca-certificates curl git sudo zsh zsh-autosuggestions openssh-client \
 	uidmap dbus-user-session fuse-overlayfs slirp4netns iptables \
+	qemu-user-static binfmt-support \
 	ripgrep fd-find bat eza zoxide fzf jq \
 	tar unzip gzip \
 	build-essential
