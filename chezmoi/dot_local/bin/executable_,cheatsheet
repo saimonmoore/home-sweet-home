@@ -474,6 +474,14 @@ HOME-SWEET-HOME HELPERS
                          ,vm-rsync --dry-run -avz ./src vm:~/dest
                        Use over ,vm-cp for big trees, incremental
                        syncs, --delete, or any rsync flag.
+  ,vm-tunnel PORT [PORT ...]  SSH -L tunnel: Mac 127.0.0.1:PORT ->
+                       VM 127.0.0.1:PORT. Needed when a service
+                       binds to the VM's localhost (lima's plain
+                       mode doesn't auto-forward 127.0.0.1).
+                       Runs in the foreground; Ctrl-C to stop, or
+                       append `&` to background it.
+                         ,vm-tunnel 3000
+                         ,vm-tunnel 3000 3001 5173
   ,sync-jfrog-to-vm    (work only) copy JFrog creds into the VM
 
 HOST <-> VM INTEGRATION
@@ -525,17 +533,30 @@ HOST <-> VM INTEGRATION
       limactl show-ssh dev          # prints an ssh_config stanza
       limactl show-ssh --format=cmd dev   # prints a ready ssh command
 
-  PORT FORWARDING — lima vzNAT (no manual setup needed)
+  PORT FORWARDING — lima vzNAT (plain mode)
 
-    VM service binds to 127.0.0.1:PORT
-      -> host reaches it at http://localhost:PORT (auto-forwarded)
-    VM service binds to 0.0.0.0:PORT (incl. podman `-p PORT:PORT`
-    defaults)
-      -> host reaches it via http://$(,vm-ip):PORT
-      -> or just run `,vm-open PORT` to open in the browser
+    Our lima config runs with `plain: true`, which disables lima's
+    dynamic port-forwarding guest agent. That means:
 
-    Prefer binding dev servers to 127.0.0.1 inside the VM — it's the
-    boring path that Just Works on the host browser/curl.
+    VM service bound to 0.0.0.0:PORT
+      -> host reaches it directly at http://<vm-ip>:PORT via vzNAT.
+      -> convenience: `,vm-open PORT` opens it in the default browser;
+         `,vm-ip` just prints the address.
+
+    VM service bound to 127.0.0.1:PORT
+      -> NOT auto-reachable from the Mac. vzNAT routes via the VM's
+         external IP; the VM's loopback is private. Use either:
+         (a) `,vm-tunnel PORT`  — SSH -L tunnel, foreground, Ctrl-C
+             to stop. Mac localhost:PORT -> VM localhost:PORT while
+             it runs. Best for ad-hoc dev.
+         (b) add a `portForwards:` entry in lima/dev-ubuntu.yaml —
+             persistent but needs `limactl stop dev && start dev`
+             to reload. Good for ports you always want forwarded.
+
+    Practical default: bind Docker publishes to `0.0.0.0:PORT` and
+    use `,vm-open`. Reach for `,vm-tunnel` when you need Mac
+    `localhost:PORT` specifically (e.g. OAuth callbacks, browser
+    extensions that require localhost).
 
   CLIPBOARD (VM -> macOS, via OSC 52)
 

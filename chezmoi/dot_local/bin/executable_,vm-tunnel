@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Forward VM 127.0.0.1:PORT to Mac 127.0.0.1:PORT over SSH.
+#
+# With lima running in plain mode (our setup), there's no dynamic port
+# forwarder — vzNAT gives IP-level reachability to the VM IP, but
+# Mac's 127.0.0.1 and VM's 127.0.0.1 are separate loopback interfaces.
+# This wraps `ssh -N -L` using lima's generated ssh config so any
+# service bound to the VM's 127.0.0.1:PORT appears at Mac's
+# localhost:PORT for as long as this command runs.
+#
+# Examples:
+#   ,vm-tunnel 3000                # Mac localhost:3000 -> VM localhost:3000
+#   ,vm-tunnel 3000 3001 5173      # multiple ports in one session
+#   ,vm-tunnel 3000 &              # run in background; kill %1 to stop
+#
+# Runs in the foreground; Ctrl-C to close all tunnels. Alternative for
+# 0.0.0.0 bindings inside the VM: use ,vm-open / ,vm-ip (direct IP).
+
+set -euo pipefail
+
+if ! command -v limactl >/dev/null 2>&1; then
+	echo "Error: limactl is not on PATH. Install via the host Brewfile." >&2
+	exit 1
+fi
+
+if [[ $# -eq 0 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+	sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
+	exit 0
+fi
+
+# Validate each argument is a bare port number (1-65535).
+fwd_args=()
+for port in "$@"; do
+	if ! [[ "$port" =~ ^[0-9]+$ ]] || (( port < 1 || port > 65535 )); then
+		echo "Error: '$port' is not a valid port number." >&2
+		exit 2
+	fi
+	fwd_args+=(-L "${port}:127.0.0.1:${port}")
+done
+
+# Regenerate lima's ssh config per-invocation. The VM's SSH port can
+# change when it's recreated; caching is riskier than the few ms it
+# saves.
+tmpconfig=$(mktemp)
+trap 'rm -f "$tmpconfig"' EXIT
+limactl show-ssh --format config dev >"$tmpconfig"
+
+echo "Forwarding Mac 127.0.0.1 <-> VM 'dev' 127.0.0.1 for: $*"
+echo "Press Ctrl-C to stop."
+exec ssh -F "$tmpconfig" -N "${fwd_args[@]}" lima-dev
