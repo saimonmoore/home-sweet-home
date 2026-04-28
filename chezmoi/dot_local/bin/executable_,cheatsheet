@@ -78,7 +78,7 @@ ZELLIJ
     Pane/Tab/...     sub-modes entered from Normal via those Ctrl keys
 
   MODE SWITCHING
-    Alt-a       toggle Locked <-> Normal
+    Alt-l       toggle Locked <-> Normal
     Esc         exit a sub-mode back to Normal (without locking)
 
   macOS keyboard note:
@@ -111,12 +111,12 @@ ZELLIJ
     Alt-s                           new stacked pane
     Alt-x                           close focused pane
 
-  PANE ACTIONS — NORMAL MODE (after Alt-a to unlock)
+  PANE ACTIONS — NORMAL MODE (after Alt-l to unlock)
     Alt-h / Alt-j / Alt-k           move focus left/down/up
                                     (Alt-l is reserved for re-locking;
                                      no move-focus-right outside Locked)
 
-  NORMAL-MODE DEFAULTS (after Alt-a to unlock)
+  NORMAL-MODE DEFAULTS (after Alt-l to unlock)
     Ctrl-p      Pane sub-mode  (n new, x close, d split-down,
                                 r split-right, f float, e embed, ...)
     Ctrl-t      Tab sub-mode   (n new, x close, r rename, s sync-input)
@@ -212,8 +212,8 @@ AI CODING HARNESSES
   One-shot override:
     AGENT_HARNESS=codex ,agent
 
-  Available harnesses depend on repo: work installs opencode + codex;
-  personal installs opencode + claude. See README for how to add more.
+  This repo installs opencode + codex + claude. See README for how to
+  add more.
 
   OAUTH BROWSER AUTH IN THE VM
     Every harness starts a local HTTP listener on 127.0.0.1:<port>
@@ -305,7 +305,8 @@ NB (NOTES)
 
 OPENSKILLS (AGENT SKILLS)
   Skills for all harnesses live in ~/.agent/skills/ and are managed
-  by openskills.
+  by openskills. For Codex compatibility, chezmoi also maintains
+  ~/.agents/skills -> ~/.agent/skills.
 
     npx openskills install <src> --universal  install skill(s)
     npx openskills list                        show installed
@@ -317,7 +318,8 @@ OPENSKILLS (AGENT SKILLS)
     chezmoi/dot_agent/openskills-manifest.txt
     chezmoi/dot_agent/skills/<name>/.openskills.json
   The run_onchange_after_openskills-bootstrap hook reconciles
-  ~/.agent/skills with the manifest on every chezmoi apply.
+  ~/.agent/skills with the manifest on every chezmoi apply and refreshes
+  the ~/.agents/skills compatibility symlink.
 
 MISE (language/tool version manager)
   Think of mise as asdf + nvm + pyenv + rbenv rolled into one. Global

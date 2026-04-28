@@ -9,12 +9,15 @@
 #      `npx openskills install <source> --universal`
 #   3. Prune any skill dir on disk whose name is not in the manifest
 #   4. Refresh ~/.agent/AGENTS.md via `npx openskills sync`
+#   5. Refresh ~/.agents/skills -> ~/.agent/skills for Codex compatibility
 
 set -uo pipefail
 
 SKILLS_ROOT="$HOME/.agent/skills"
 MANIFEST="$HOME/.agent/openskills-manifest.txt"
 AGENTS_MD="$HOME/.agent/AGENTS.md"
+CODEX_AGENTS_DIR="$HOME/.agents"
+CODEX_SKILLS_LINK="$CODEX_AGENTS_DIR/skills"
 
 # chezmoi hooks run in a bash subshell that inherits whatever PATH the
 # invoking shell had. If the caller hasn't activated mise (which is the
@@ -115,6 +118,9 @@ fi
 
 echo "==> openskills sync -o $AGENTS_MD"
 npx --yes openskills sync -y -o "$AGENTS_MD" || true
+
+mkdir -p "$CODEX_AGENTS_DIR"
+ln -sfn "$SKILLS_ROOT" "$CODEX_SKILLS_LINK"
 
 if (( failed > 0 )); then
 	echo "$failed source(s) failed to install; re-run this hook after fixing." >&2

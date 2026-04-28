@@ -3,6 +3,13 @@ set -eux -o pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 
+# GitHub SSH can hang inside the Lima guest on some host/VPN/Wi-Fi
+# paths when the default 1500-byte MTU on lima0 is too optimistic.
+# Keep the guest-side MTU conservative so PMTU black holes don't break
+# git pull/push while leaving the host networking untouched.
+LIMA_PRIMARY_IFACE="${LIMA_PRIMARY_IFACE:-lima0}"
+LIMA_PRIMARY_MTU="${LIMA_PRIMARY_MTU:-1280}"
+
 apt-get update
 apt-get install -y --no-install-recommends \
 	ca-certificates curl git sudo zsh zsh-autosuggestions openssh-client \
@@ -81,3 +88,43 @@ systemctl disable --now docker.service docker.socket 2>/dev/null || true
 # the rootless Docker service stays up even when no interactive shell
 # is attached.
 loginctl enable-linger dev
+
+cat >/usr/local/sbin/home-sweet-home-fix-lima-mtu <<EOF
+#!/bin/sh
+set -eu
+
+iface="${LIMA_PRIMARY_IFACE}"
+mtu="${LIMA_PRIMARY_MTU}"
+
+i=0
+while [ "\$i" -lt 30 ]; do
+	if ip link show dev "\$iface" >/dev/null 2>&1; then
+		ip link set dev "\$iface" mtu "\$mtu"
+		exit 0
+	fi
+	i=\$((i + 1))
+	sleep 1
+done
+
+echo "warning: interface \$iface not found; skipped MTU adjustment" >&2
+exit 0
+EOF
+chmod 0755 /usr/local/sbin/home-sweet-home-fix-lima-mtu
+
+cat >/etc/systemd/system/home-sweet-home-fix-lima-mtu.service <<EOF
+[Unit]
+Description=Apply a conservative MTU to Lima's primary NIC
+After=network-pre.target systemd-udev-settle.service
+Wants=systemd-udev-settle.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/home-sweet-home-fix-lima-mtu
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable home-sweet-home-fix-lima-mtu.service

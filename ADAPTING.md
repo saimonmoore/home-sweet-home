@@ -71,6 +71,9 @@ Defined in `lima/dev-ubuntu.yaml`:
 - **Mounts:** none (intentional — keeps host/VM cleanly separated)
 - **Containerd:** disabled (podman installed instead)
 - **Networking:** vzNAT; localhost-bound ports auto-forward to host; 0.0.0.0 services reached via `,vm-ip`
+- **MTU workaround:** provisioning installs a small systemd oneshot that
+  sets `lima0` to MTU 1280 at boot, which avoids SSH/Git hangs on
+  networks where PMTU discovery is broken through the guest NAT path
 
 `lima/dev-ubuntu-system.sh` provisions via `apt-get`: git, curl, zsh,
 zsh-autosuggestions, openssh-client, podman, podman-compose, uidmap,
@@ -92,6 +95,7 @@ provisioning script symlinks `/usr/local/bin/fd` → `/usr/bin/fdfind` and
 | Add host mounts         | `mounts:` list in `dev-ubuntu.yaml` (empty by default)         |
 | Different VM name       | Pass `--name` to `,create-vm`; update `,dev`, `,vm-ip`, `,vm-open`, `,sync-jfrog-to-vm` scripts if you want a different default |
 | Different default shell | `user.shell` in `dev-ubuntu.yaml` and the `chsh` step          |
+| Tune the VM MTU         | `LIMA_PRIMARY_IFACE` / `LIMA_PRIMARY_MTU` near the top of `lima/dev-ubuntu-system.sh` |
 
 Existing VMs predating the vzNAT change need a one-off network reset — see
 the README.
@@ -184,9 +188,9 @@ or drop the bootstrap script entirely and bring your own config.
   - `default.kdl` — single focused pane
   - `dev.kdl` — Neovim 70% / shell 30%
   - `dev-agentic.kdl` — Neovim 70% / opencode 30%
-- Uses locked-mode workflow (Alt+Shift combos); see `,cheatsheet` for the full
-  map. Floating helpers: `Alt+Shift+g` lazygit, `Alt+Shift+r` scooter,
-  `Alt+Shift+e` yazi.
+- Uses locked-mode workflow with Alt chords; see `,cheatsheet` for the full
+  map. Floating helpers: `Alt+g` lazygit, `Alt+r` scooter,
+  `Alt+e` yazi. `Alt+l` toggles Locked/Normal mode.
 
 Add your own layout by dropping a new `.kdl` next to the existing ones —
 `,zlayout <name> [zoxide-args]` will pick it up.
@@ -266,10 +270,12 @@ and `chezmoi/dot_nbrc`.
 
 ## AI coding harnesses
 
-Both `opencode` and `claude` (Claude Code) are installed
-unconditionally — `opencode` via Homebrew on the host and mise in the
-VM; `claude` via the `claude-code` cask on the host and
-`npm:@anthropic-ai/claude-code` via mise in the VM.
+`opencode`, `codex`, and `claude` (Claude Code) are installed
+alongside each other — `opencode` via Homebrew on the host and mise in
+the VM; `codex` via the `codex` cask on the host and
+`npm:@openai/codex` via mise in the VM; `claude` via the
+`claude-code` cask on the host and `npm:@anthropic-ai/claude-code`
+via mise in the VM.
 
 A chezmoi-managed shim (`chezmoi/dot_local/bin/executable_,agent`)
 reads a selection from `~/.config/home-sweet-home/agent` (set with
@@ -293,7 +299,9 @@ inside the VM to complete the OAuth callback.
 `~/.agent/skills/` is the single source of truth for skills available
 to every harness. [openskills](https://github.com/numman-ali/openskills)
 installs skills there (`--universal` mode) and writes an origin
-`.openskills.json` alongside each skill.
+`.openskills.json` alongside each skill. chezmoi also maintains
+`~/.agents/skills` as a compatibility symlink to the same directory so
+Codex sees the same installed skills.
 
 This repo commits the shape, not the content:
 
@@ -303,12 +311,12 @@ This repo commits the shape, not the content:
   origin metadata. `create_` prefix so chezmoi drops it once and
   openskills can then refresh it without producing apply drift.
 
-The `run_after_agent-skills-bootstrap.sh.tmpl` hook reconciles disk
+The `run_onchange_after_openskills-bootstrap.sh.tmpl` hook reconciles disk
 state against the manifest on every apply: installs each unique
-source, prunes dirs whose names aren't in the manifest, and
-regenerates `~/.agent/AGENTS.md` via `openskills sync`. `npx` + `jq`
-are the runtime requirements — both come in via the Brewfile on the
-host and mise in the VM.
+source, prunes dirs whose names aren't in the manifest, regenerates
+`~/.agent/AGENTS.md` via `openskills sync`, and refreshes the
+`~/.agents/skills` symlink. `npx` + `jq` are the runtime requirements
+— both come in via the Brewfile on the host and mise in the VM.
 
 To add a skill:
 

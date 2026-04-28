@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # Harnesses this machine knows about (personal fork).
-KNOWN_HARNESSES=( opencode claude )
+KNOWN_HARNESSES=( opencode codex claude )
 
 STATE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/home-sweet-home/agent"
 

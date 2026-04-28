@@ -173,17 +173,20 @@ with `,agent-select`.
 - **opencode** — installed unconditionally, both on the host via the
   Brewfile (`brew "opencode"`) and inside the dev VM via mise
   (`opencode = "latest"`).
+- **codex** — installed on the host via `cask "codex"` and in the VM
+  via mise (`"npm:@openai/codex" = "latest"`).
 - **claude** (Claude Code) — installed on the host via
   `cask "claude-code"` and in the VM via mise
   (`"npm:@anthropic-ai/claude-code" = "latest"`).
 
-Both are always available. The shim just decides which one launches
+All three are available. The shim just decides which one launches
 when you invoke `,agent`.
 
 ### Switching
 
 ```bash
 ,agent-select              # show the current selection + availability of each
+,agent-select codex        # persist a selection (sticks across shells)
 ,agent-select claude       # persist a selection (sticks across shells)
 ,agent-select --clear      # drop the persistent selection; ,agent falls back to opencode
 ```
@@ -224,7 +227,9 @@ against the manifest:
    `.openskills.json` files,
 2. runs `npx openskills install <source> --universal` for each,
 3. prunes any skill dir on disk whose name is not in the manifest,
-4. regenerates `~/.agent/AGENTS.md` via `npx openskills sync`.
+4. regenerates `~/.agent/AGENTS.md` via `npx openskills sync`,
+5. refreshes `~/.agents/skills` to point at `~/.agent/skills` so
+   Codex sees the same installed skills.
 
 Run it manually with `chezmoi apply` or just `npx openskills install
 <source> --universal` for ad-hoc additions — then `chezmoi add
@@ -290,6 +295,13 @@ finishes auth.
   probably a drift from `,chezmoi-update`.
 - **VM won't start** → `limactl stop dev; limactl delete dev;
   ,create-vm`. VMs from before the vzNAT change need this recreate.
+- **`git pull` / `git push` hangs inside the VM** → on some
+  host/VPN/Wi-Fi paths, PMTU discovery breaks for Lima's `lima0`
+  interface and SSH stalls at `expecting SSH2_MSG_KEX_ECDH_REPLY`.
+  Fresh VMs now install a boot-time fix that sets `lima0` to MTU
+  1280. Existing VMs can apply the same workaround immediately with
+  `sudo ip link set dev lima0 mtu 1280`, then either recreate the VM
+  with `,create-vm` or install the same change permanently.
 - **Cask install hung on permission prompt** → re-run `brew bundle`
   after approving; casks are idempotent.
 - **`chezmoi init` with username-only shorthand resolves elsewhere**
